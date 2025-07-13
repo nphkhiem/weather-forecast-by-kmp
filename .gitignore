@@ -1,0 +1,34 @@
+### General
+.gradle
+local.properties
+build/
+**/build
+**/*.db
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+*.hprof
+out/
+.fleet/
+
+### iOS Xcode generated ###
+iosApp/iosApp.xcodeproj/*
+!iosApp/iosApp.xcodeproj/project.pbxproj
+/.build 
+/Packages
+xcuserdata/
+DerivedData/
+.swiftpm/configuration/registries.json
+.swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
+.netrc
+Package.resolved
+
+### Mac OS ###
+.DS_Store
+
+### Firebase ###
+/composeApp/google-services.json
+iosApp/iosApp/GoogleService-Info.plist
