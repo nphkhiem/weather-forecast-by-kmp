@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.safeContentPadding
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -33,10 +35,10 @@ fun App() {
                 Text("Click me!")
             }
             AnimatedVisibility(showContent) {
-                val greeting = remember { Greeting().greet() }
-                Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Image(painterResource(Res.drawable.compose_multiplatform), null)
-                    Text("Compose: $greeting")
+                Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
+                    Text(
+                        text =
+                    )
                 }
             }
         }
