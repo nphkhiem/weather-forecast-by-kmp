@@ -1,6 +1,9 @@
+import com.codingfeline.buildkonfig.compiler.FieldSpec
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.io.FileInputStream
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -10,6 +13,7 @@ plugins {
     alias(libs.plugins.kotlinxSerialization)
     alias(libs.plugins.sqldelight)
     alias(libs.plugins.kover)
+    alias(libs.plugins.buildkonfig)
 }
 
 kotlin {
@@ -89,6 +93,30 @@ sqldelight {
             packageName.set("com.example.my_weather_forecast.data.local")
         }
     }
+}
+
+val localProperties = Properties().apply {
+    val file = rootProject.file("local.properties")
+    if (file.exists()) {
+        FileInputStream(file).use { load(it) }
+    }
+}
+
+buildkonfig {
+    packageName = "com.example.my_weather_forecast"
+    defaultConfigs {
+        buildConfigField(
+            FieldSpec.Type.STRING,
+            "OWM_API_KEY",
+            localProperties.getProperty("owm.apiKey", ""),
+        )
+    }
+}
+
+// BuildKonfig's generated source isn't always wired as a compile-task input on this
+// Kotlin/AGP combination, so the dependency is declared explicitly.
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompileTool>().configureEach {
+    dependsOn("generateBuildKonfig")
 }
 
 android {

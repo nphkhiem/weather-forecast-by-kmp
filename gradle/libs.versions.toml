@@ -24,6 +24,7 @@ kotlinxSerialization = "1.9.0"
 sqldelight = "2.3.2"
 turbine = "1.2.1"
 kover = "0.9.8"
+buildkonfig = "0.21.2"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -78,3 +79,4 @@ kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref =
 kotlinxSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }
 kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
+buildkonfig = { id = "com.codingfeline.buildkonfig", version.ref = "buildkonfig" }

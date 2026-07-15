@@ -21,4 +21,11 @@ class KoinGraphTest {
         assertNotNull(koin.get<DispatcherProvider>())
         assertNotNull(koin.get<TimeProvider>())
     }
+
+    @Test
+    fun givenInitKoin_whenResolvingOwmApiKey_thenNamedStringIsProvided() {
+        val koin = initKoin().koin
+
+        assertNotNull(koin.get<String>(OWM_API_KEY_QUALIFIER))
+    }
 }
