@@ -41,6 +41,12 @@ class KtorWeatherRemoteDataSourceTest {
         headers = headersOf(HttpHeaders.ContentType, "application/json"),
     )
 
+    private fun MockRequestHandleScope.geoResponse(body: String) = respond(
+        content = ByteReadChannel(body),
+        status = HttpStatusCode.OK,
+        headers = headersOf(HttpHeaders.ContentType, "application/json"),
+    )
+
     @Test
     fun givenLatLonAndUnits_whenFetchForecast_thenRequestHitsOneCallWithExcludeAndCorrectQuery() = runTest {
         var capturedRequest: HttpRequestData? = null
@@ -98,5 +104,56 @@ class KtorWeatherRemoteDataSourceTest {
         val result = dataSource(engine).fetchForecast(location, Units.METRIC)
 
         assertEquals(AppResult.Failure(WeatherError.Network), result)
+    }
+
+    @Test
+    fun givenAQuery_whenSearchCity_thenRequestHitsGeocodingWithQAndLimitFive() = runTest {
+        var capturedRequest: HttpRequestData? = null
+        val engine = MockEngine { request ->
+            capturedRequest = request
+            geoResponse("[]")
+        }
+
+        dataSource(engine).searchCity("Chicago")
+
+        val request = requireNotNull(capturedRequest)
+        assertEquals("api.openweathermap.org", request.url.host)
+        assertEquals("/geo/1.0/direct", request.url.encodedPath)
+        assertEquals("Chicago", request.url.parameters["q"])
+        assertEquals("5", request.url.parameters["limit"])
+        assertEquals("test-key", request.url.parameters["appid"])
+    }
+
+    @Test
+    fun givenResults_whenSearchCity_thenReturnsMappedLocations() = runTest {
+        val engine = MockEngine { geoResponse(GEO_RESULTS_JSON) }
+
+        val result = dataSource(engine).searchCity("Chicago")
+
+        val success = result as AppResult.Success
+        assertEquals(2, success.data.size)
+        assertEquals("Chicago", success.data.first().name)
+        assertEquals("US", success.data.first().country)
+        assertEquals("Illinois", success.data.first().state)
+        assertEquals(41.85003, success.data.first().lat)
+        assertEquals(-87.65005, success.data.first().lon)
+    }
+
+    @Test
+    fun givenEmptyResults_whenSearchCity_thenReturnsNotFound() = runTest {
+        val engine = MockEngine { geoResponse("[]") }
+
+        val result = dataSource(engine).searchCity("Nonexistent City Xyz")
+
+        assertEquals(AppResult.Failure(WeatherError.NotFound), result)
+    }
+
+    private companion object {
+        val GEO_RESULTS_JSON = """
+            [
+              { "name": "Chicago", "lat": 41.85003, "lon": -87.65005, "country": "US", "state": "Illinois" },
+              { "name": "Chicago Heights", "lat": 41.5065, "lon": -87.635, "country": "US", "state": "Illinois" }
+            ]
+        """.trimIndent()
     }
 }

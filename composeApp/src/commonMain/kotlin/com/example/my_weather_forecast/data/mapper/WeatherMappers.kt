@@ -2,6 +2,7 @@ package com.example.my_weather_forecast.data.mapper
 
 import com.example.my_weather_forecast.data.remote.dto.CurrentDto
 import com.example.my_weather_forecast.data.remote.dto.DailyDto
+import com.example.my_weather_forecast.data.remote.dto.GeoResultDto
 import com.example.my_weather_forecast.data.remote.dto.HourlyDto
 import com.example.my_weather_forecast.data.remote.dto.OneCallResponseDto
 import com.example.my_weather_forecast.data.remote.dto.WeatherConditionDto
@@ -60,6 +61,17 @@ fun DailyDto.toDomain(timezoneOffsetSeconds: Int): DailyForecast = DailyForecast
     windSpeed = windSpeed,
     pop = pop,
     condition = weather.first().toDomain(),
+)
+
+// id/sortOrder are placeholders; a real value is assigned when the location is persisted (Phase 2).
+fun GeoResultDto.toDomain(): Location = Location(
+    id = 0L,
+    name = name,
+    country = country,
+    state = state,
+    lat = lat,
+    lon = lon,
+    sortOrder = 0,
 )
 
 fun OneCallResponseDto.toDomain(location: Location, units: Units, fetchedAt: Instant): Forecast = Forecast(

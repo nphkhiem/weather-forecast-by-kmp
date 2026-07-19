@@ -7,4 +7,5 @@ import com.example.my_weather_forecast.domain.model.Units
 
 interface WeatherRemoteDataSource {
     suspend fun fetchForecast(location: Location, units: Units): AppResult<Forecast>
+    suspend fun searchCity(query: String): AppResult<List<Location>>
 }
