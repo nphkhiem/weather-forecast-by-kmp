@@ -22,3 +22,14 @@ fun WeatherIcon.toDrawableResource(): DrawableResource = when (this) {
     WeatherIcon.CLOUDS -> Res.drawable.ic_weather_clouds
     WeatherIcon.UNKNOWN -> Res.drawable.ic_weather_unknown
 }
+
+fun WeatherIcon.readableName(): String = when (this) {
+    WeatherIcon.THUNDERSTORM -> "Thunderstorm"
+    WeatherIcon.DRIZZLE -> "Drizzle"
+    WeatherIcon.RAIN -> "Rain"
+    WeatherIcon.SNOW -> "Snow"
+    WeatherIcon.ATMOSPHERE -> "Mist"
+    WeatherIcon.CLEAR -> "Clear"
+    WeatherIcon.CLOUDS -> "Clouds"
+    WeatherIcon.UNKNOWN -> "Unknown conditions"
+}
