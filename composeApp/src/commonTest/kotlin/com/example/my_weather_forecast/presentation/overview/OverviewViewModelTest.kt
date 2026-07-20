@@ -1,0 +1,155 @@
+package com.example.my_weather_forecast.presentation.overview
+
+import app.cash.turbine.test
+import com.example.my_weather_forecast.core.result.AppResult
+import com.example.my_weather_forecast.core.result.WeatherError
+import com.example.my_weather_forecast.domain.model.ForecastObservation
+import com.example.my_weather_forecast.domain.model.Location
+import com.example.my_weather_forecast.domain.usecase.AddLocationUseCase
+import com.example.my_weather_forecast.domain.usecase.ObserveSavedLocationsUseCase
+import com.example.my_weather_forecast.domain.usecase.RemoveLocationUseCase
+import com.example.my_weather_forecast.testutil.FakeSavedLocationRepository
+import com.example.my_weather_forecast.testutil.FakeWeatherRepository
+import com.example.my_weather_forecast.testutil.runMainDispatcherTest
+import com.example.my_weather_forecast.testutil.sampleForecast
+import kotlinx.coroutines.test.TestScope
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertIs
+
+class OverviewViewModelTest {
+
+    private val savedLocationRepository = FakeSavedLocationRepository()
+    private val weatherRepository = FakeWeatherRepository()
+
+    private val chicago = Location(
+        id = 1, name = "Chicago", country = "US", state = "IL", lat = 41.85, lon = -87.65, sortOrder = 0,
+    )
+
+    private fun testOverview(body: suspend TestScope.(OverviewViewModel) -> Unit) = runMainDispatcherTest {
+        val viewModel = OverviewViewModel(
+            observeSavedLocationsUseCase = ObserveSavedLocationsUseCase(savedLocationRepository),
+            removeLocationUseCase = RemoveLocationUseCase(savedLocationRepository),
+            addLocationUseCase = AddLocationUseCase(savedLocationRepository),
+            weatherRepository = weatherRepository,
+        )
+        body(viewModel)
+    }
+
+    @Test
+    fun givenNoSavedAreas_whenObserved_thenEmpty() = testOverview { viewModel ->
+        viewModel.uiState.test {
+            assertEquals(OverviewUiState.Loading, awaitItem())
+            assertEquals(OverviewUiState.Empty, awaitItem())
+        }
+    }
+
+    @Test
+    fun givenSavedAreasWithCache_whenObserved_thenSuccessWithASummaryPerArea() = testOverview { viewModel ->
+        savedLocationRepository.add(chicago)
+        weatherRepository.setObservation(chicago.id, ForecastObservation.Success(sampleForecast(chicago), stale = false))
+
+        viewModel.uiState.test {
+            assertEquals(OverviewUiState.Loading, awaitItem())
+            val success = awaitItem()
+            assertIs<OverviewUiState.Success>(success)
+            assertEquals(1, success.areas.size)
+            assertEquals(chicago.id, success.areas.first().id)
+        }
+    }
+
+    @Test
+    fun givenAnAreaWithNoCacheThatFailsToFetch_whenObserved_thenError() = testOverview { viewModel ->
+        savedLocationRepository.add(chicago)
+        weatherRepository.setObservation(chicago.id, ForecastObservation.Error(WeatherError.Network))
+
+        viewModel.uiState.test {
+            assertEquals(OverviewUiState.Loading, awaitItem())
+            assertEquals(OverviewUiState.Error(WeatherError.Network), awaitItem())
+        }
+    }
+
+    @Test
+    fun givenARefreshError_whenRefresh_thenShowMessageEventAndPriorDataRetained() = testOverview { viewModel ->
+        savedLocationRepository.add(chicago)
+        weatherRepository.setObservation(chicago.id, ForecastObservation.Success(sampleForecast(chicago), stale = false))
+        weatherRepository.refreshResult = AppResult.Failure(WeatherError.Network)
+
+        // refresh() reads the locations uiState's upstream has already observed, so subscribe first.
+        viewModel.uiState.test {
+            awaitItem()
+            val success = awaitItem()
+            assertIs<OverviewUiState.Success>(success)
+
+            viewModel.events.test {
+                viewModel.refresh()
+                val event = awaitItem()
+                assertIs<OverviewEvent.ShowMessage>(event)
+                assertEquals(false, event.undoable)
+            }
+            expectNoEvents()
+        }
+    }
+
+    @Test
+    fun givenARefresh_whenInFlight_thenIsRefreshingReflectsProgress() = testOverview { viewModel ->
+        savedLocationRepository.add(chicago)
+        weatherRepository.setObservation(chicago.id, ForecastObservation.Success(sampleForecast(chicago), stale = false))
+
+        viewModel.uiState.test {
+            awaitItem()
+            awaitItem()
+
+            viewModel.isRefreshing.test {
+                assertEquals(false, awaitItem())
+                viewModel.refresh()
+                assertEquals(true, awaitItem())
+                assertEquals(false, awaitItem())
+            }
+        }
+    }
+
+    @Test
+    fun givenCardTapped_whenOnAreaClick_thenOpenDetailEmittedOnce() = testOverview { viewModel ->
+        viewModel.events.test {
+            viewModel.onAreaClick(chicago.id)
+            assertEquals(OverviewEvent.OpenDetail(chicago.id), awaitItem())
+        }
+    }
+
+    @Test
+    fun givenASavedArea_whenRemoveArea_thenDisappearsFromSuccessAndShowMessageEmittedOnce() = testOverview { viewModel ->
+        savedLocationRepository.add(chicago)
+        weatherRepository.setObservation(chicago.id, ForecastObservation.Success(sampleForecast(chicago), stale = false))
+
+        viewModel.events.test {
+            viewModel.uiState.test {
+                awaitItem()
+                awaitItem()
+                viewModel.removeArea(chicago.id)
+                assertEquals(OverviewUiState.Empty, awaitItem())
+            }
+            val event = awaitItem()
+            assertIs<OverviewEvent.ShowMessage>(event)
+            assertEquals(true, event.undoable)
+        }
+    }
+
+    @Test
+    fun givenARemovedArea_whenUndoRemove_thenReappearsInSuccess() = testOverview { viewModel ->
+        savedLocationRepository.add(chicago)
+        weatherRepository.setObservation(chicago.id, ForecastObservation.Success(sampleForecast(chicago), stale = false))
+
+        viewModel.uiState.test {
+            awaitItem()
+            awaitItem()
+            viewModel.removeArea(chicago.id)
+            assertEquals(OverviewUiState.Empty, awaitItem())
+
+            viewModel.undoRemove()
+            val restored = awaitItem()
+            assertIs<OverviewUiState.Success>(restored)
+            assertEquals(chicago.id, restored.areas.first().id)
+        }
+    }
+}

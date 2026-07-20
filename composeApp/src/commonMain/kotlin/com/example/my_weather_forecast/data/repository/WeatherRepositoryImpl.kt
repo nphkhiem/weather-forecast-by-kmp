@@ -50,7 +50,11 @@ class WeatherRepositoryImpl(
                 }
             } else {
                 if (!emittedSomething) emit(ForecastObservation.Loading)
-                coalescedRefresh(location, units)
+                val error = coalescedRefresh(location, units)
+                if (error != null) {
+                    emittedSomething = true
+                    emit(ForecastObservation.Error(error))
+                }
             }
         }
     }
