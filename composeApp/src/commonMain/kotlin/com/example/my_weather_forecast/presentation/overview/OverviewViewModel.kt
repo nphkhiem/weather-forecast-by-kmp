@@ -15,10 +15,12 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
@@ -38,6 +40,9 @@ class OverviewViewModel(
 
     private val _events = MutableSharedFlow<OverviewEvent>()
     val events: SharedFlow<OverviewEvent> = _events.asSharedFlow()
+
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
     private var latestLocations: List<Location> = emptyList()
     private var lastRemovedLocation: Location? = null
@@ -92,14 +97,19 @@ class OverviewViewModel(
 
     fun refresh() {
         viewModelScope.launch {
-            val anyFailed = coroutineScope {
-                latestLocations
-                    .map { location -> async { weatherRepository.refresh(location, units) } }
-                    .map { it.await() }
-                    .any { it is AppResult.Failure }
-            }
-            if (anyFailed) {
-                _events.emit(OverviewEvent.ShowMessage("Some areas couldn't be refreshed"))
+            _isRefreshing.value = true
+            try {
+                val anyFailed = coroutineScope {
+                    latestLocations
+                        .map { location -> async { weatherRepository.refresh(location, units) } }
+                        .map { it.await() }
+                        .any { it is AppResult.Failure }
+                }
+                if (anyFailed) {
+                    _events.emit(OverviewEvent.ShowMessage("Some areas couldn't be refreshed"))
+                }
+            } finally {
+                _isRefreshing.value = false
             }
         }
     }
@@ -109,7 +119,7 @@ class OverviewViewModel(
             val removed = latestLocations.find { it.id == id } ?: return@launch
             removeLocationUseCase(id)
             lastRemovedLocation = removed
-            _events.emit(OverviewEvent.ShowMessage("${removed.name} removed"))
+            _events.emit(OverviewEvent.ShowMessage("${removed.name} removed", undoable = true))
         }
     }
 

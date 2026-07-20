@@ -1,4 +1,7 @@
+@file:OptIn(ExperimentalComposeLibrary::class)
+
 import com.codingfeline.buildkonfig.compiler.FieldSpec
+import org.jetbrains.compose.ExperimentalComposeLibrary
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
@@ -84,6 +87,12 @@ kotlin {
             // JDBC-backed in-memory driver is JVM-only; not resolvable for iOS test compilation.
             implementation(libs.sqldelight.sqlite.driver)
         }
+        androidInstrumentedTest.dependencies {
+            implementation(compose.uiTest)
+            implementation(libs.androidx.compose.ui.test.junit4)
+            implementation(libs.androidx.testExt.junit)
+            implementation(libs.androidx.espresso.core)
+        }
     }
 }
 
@@ -129,6 +138,7 @@ android {
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
         versionName = "1.0"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     packaging {
         resources {
@@ -148,6 +158,7 @@ android {
 
 dependencies {
     debugImplementation(compose.uiTooling)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
     implementation(libs.kotlinx.coroutines.android)
 }
 

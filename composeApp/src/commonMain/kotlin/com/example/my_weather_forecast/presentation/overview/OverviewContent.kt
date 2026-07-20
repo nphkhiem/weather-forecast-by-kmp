@@ -13,8 +13,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.example.my_weather_forecast.core.result.WeatherError
+
+const val OVERVIEW_CONTENT_TEST_TAG = "overview_content"
 
 @Composable
 fun OverviewContent(
@@ -23,11 +26,12 @@ fun OverviewContent(
     onRemove: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val taggedModifier = modifier.testTag(OVERVIEW_CONTENT_TEST_TAG)
     when (uiState) {
-        is OverviewUiState.Loading -> LoadingContent(modifier)
-        is OverviewUiState.Empty -> EmptyContent(modifier)
-        is OverviewUiState.Error -> ErrorContent(uiState.error, modifier)
-        is OverviewUiState.Success -> SuccessContent(uiState.areas, onAreaClick, onRemove, modifier)
+        is OverviewUiState.Loading -> LoadingContent(taggedModifier)
+        is OverviewUiState.Empty -> EmptyContent(taggedModifier)
+        is OverviewUiState.Error -> ErrorContent(uiState.error, taggedModifier)
+        is OverviewUiState.Success -> SuccessContent(uiState.areas, onAreaClick, onRemove, taggedModifier)
     }
 }
 

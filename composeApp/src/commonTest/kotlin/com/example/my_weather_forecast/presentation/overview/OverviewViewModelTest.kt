@@ -83,9 +83,29 @@ class OverviewViewModelTest {
 
             viewModel.events.test {
                 viewModel.refresh()
-                assertIs<OverviewEvent.ShowMessage>(awaitItem())
+                val event = awaitItem()
+                assertIs<OverviewEvent.ShowMessage>(event)
+                assertEquals(false, event.undoable)
             }
             expectNoEvents()
+        }
+    }
+
+    @Test
+    fun givenARefresh_whenInFlight_thenIsRefreshingReflectsProgress() = testOverview { viewModel ->
+        savedLocationRepository.add(chicago)
+        weatherRepository.setObservation(chicago.id, ForecastObservation.Success(sampleForecast(chicago), stale = false))
+
+        viewModel.uiState.test {
+            awaitItem()
+            awaitItem()
+
+            viewModel.isRefreshing.test {
+                assertEquals(false, awaitItem())
+                viewModel.refresh()
+                assertEquals(true, awaitItem())
+                assertEquals(false, awaitItem())
+            }
         }
     }
 
@@ -109,7 +129,9 @@ class OverviewViewModelTest {
                 viewModel.removeArea(chicago.id)
                 assertEquals(OverviewUiState.Empty, awaitItem())
             }
-            assertIs<OverviewEvent.ShowMessage>(awaitItem())
+            val event = awaitItem()
+            assertIs<OverviewEvent.ShowMessage>(event)
+            assertEquals(true, event.undoable)
         }
     }
 
