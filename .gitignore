@@ -1,5 +1,6 @@
 ### General
 .gradle
+.kotlin
 local.properties
 build/
 **/build
