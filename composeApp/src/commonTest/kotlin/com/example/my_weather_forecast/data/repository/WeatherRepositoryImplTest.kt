@@ -73,6 +73,18 @@ class WeatherRepositoryImplTest {
     }
 
     @Test
+    fun givenNoCacheAndRefreshFails_whenObserve_thenLoadingThenError() = runTest {
+        val remote = FakeWeatherRemoteDataSource { _, _ -> AppResult.Failure(WeatherError.Network) }
+
+        repository(remote).observe(location, Units.METRIC).test {
+            assertEquals(ForecastObservation.Loading, awaitItem())
+            assertEquals(ForecastObservation.Error(WeatherError.Network), awaitItem())
+            expectNoEvents()
+        }
+        assertEquals(1, remote.fetchForecastCallCount)
+    }
+
+    @Test
     fun givenStaleCacheAndOffline_whenObserve_thenEmitsCachedForecastFlaggedStaleWithNetworkErrorNoCrash() = runTest {
         val stale = sampleForecast(location, fetchedAtEpochMillis = NOW - 40.minutesInMillis)
         localDataSource.upsert(location.id, stale)
