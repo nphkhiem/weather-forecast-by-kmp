@@ -11,7 +11,11 @@ import com.example.my_weather_forecast.domain.model.WeatherIcon
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 
-fun sampleForecast(location: Location) = Forecast(
+fun sampleForecast(
+    location: Location,
+    fetchedAtEpochMillis: Long = 1704124800_000L,
+    units: Units = Units.METRIC,
+) = Forecast(
     location = location,
     current = CurrentConditions(
         temp = 282.55,
@@ -32,7 +36,9 @@ fun sampleForecast(location: Location) = Forecast(
             condition = WeatherCondition(owmCode = 500, group = "Rain", description = "light rain", icon = WeatherIcon.RAIN),
         ),
     ),
-    hourly = listOf(HourlyForecast(time = Instant.fromEpochSeconds(1704124800), temp = 283.15, pop = 0.35, windSpeed = 4.1)),
-    units = Units.METRIC,
-    fetchedAt = Instant.fromEpochSeconds(1704124800),
+    hourly = listOf(
+        HourlyForecast(time = Instant.fromEpochMilliseconds(fetchedAtEpochMillis), temp = 283.15, pop = 0.35, windSpeed = 4.1),
+    ),
+    units = units,
+    fetchedAt = Instant.fromEpochMilliseconds(fetchedAtEpochMillis),
 )
