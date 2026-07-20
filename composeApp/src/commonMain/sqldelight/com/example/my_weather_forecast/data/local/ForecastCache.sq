@@ -1,0 +1,18 @@
+import com.example.my_weather_forecast.domain.model.Forecast;
+
+CREATE TABLE ForecastCache (
+    locationId INTEGER NOT NULL PRIMARY KEY,
+    units TEXT NOT NULL,
+    fetchedAtEpochMs INTEGER NOT NULL,
+    payload TEXT AS Forecast NOT NULL
+);
+
+selectByLocationId:
+SELECT * FROM ForecastCache WHERE locationId = ?;
+
+upsert:
+INSERT OR REPLACE INTO ForecastCache(locationId, units, fetchedAtEpochMs, payload)
+VALUES (?, ?, ?, ?);
+
+deleteByLocationId:
+DELETE FROM ForecastCache WHERE locationId = ?;

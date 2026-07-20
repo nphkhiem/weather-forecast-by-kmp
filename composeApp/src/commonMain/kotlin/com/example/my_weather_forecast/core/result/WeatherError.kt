@@ -13,5 +13,11 @@ sealed interface WeatherError {
     /** Geocoding returned no results, or the resource otherwise 404s. */
     data object NotFound : WeatherError
 
+    /** Already at the max of 6 saved areas. */
+    data object AtLimit : WeatherError
+
+    /** A candidate location is within ~0.01° of an already-saved area. */
+    data object AlreadySaved : WeatherError
+
     data class Unknown(val cause: String) : WeatherError
 }

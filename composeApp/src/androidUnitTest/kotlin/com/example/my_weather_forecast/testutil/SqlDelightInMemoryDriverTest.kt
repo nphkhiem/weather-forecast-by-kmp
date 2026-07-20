@@ -7,8 +7,8 @@ import kotlin.test.Test
 import kotlin.test.assertNotNull
 
 /**
- * Proves the JDBC in-memory driver opens on the JVM test target. No schema exists yet
- * (no .sq files until Phase 2/T2.1), so this only spins up the raw driver.
+ * Proves the JDBC in-memory driver opens on the JVM test target, independent of any
+ * particular schema. Schema-backed local data source tests live under data/local.
  */
 class SqlDelightInMemoryDriverTest {
 
