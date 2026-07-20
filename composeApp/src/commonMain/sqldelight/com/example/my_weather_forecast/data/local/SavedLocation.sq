@@ -1,0 +1,19 @@
+CREATE TABLE SavedLocation (
+    id INTEGER NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL,
+    country TEXT NOT NULL,
+    state TEXT,
+    lat REAL NOT NULL,
+    lon REAL NOT NULL,
+    sortOrder INTEGER NOT NULL
+);
+
+selectAll:
+SELECT * FROM SavedLocation ORDER BY sortOrder ASC;
+
+insert:
+INSERT INTO SavedLocation(name, country, state, lat, lon, sortOrder)
+VALUES (?, ?, ?, ?, ?, ?);
+
+deleteById:
+DELETE FROM SavedLocation WHERE id = ?;

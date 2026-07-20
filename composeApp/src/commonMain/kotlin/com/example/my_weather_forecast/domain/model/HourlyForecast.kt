@@ -1,7 +1,9 @@
 package com.example.my_weather_forecast.domain.model
 
 import kotlinx.datetime.Instant
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class HourlyForecast(
     val time: Instant,
     val temp: Double,
