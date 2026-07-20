@@ -36,3 +36,6 @@ iosApp/iosApp/GoogleService-Info.plist
 
 ### Local-only docs (not pushed) ###
 /CONTEXT.md
+/CLAUDE.md
+/docs/weather-forecast-idea.md
+/docs/weather-forecast-plan.md
