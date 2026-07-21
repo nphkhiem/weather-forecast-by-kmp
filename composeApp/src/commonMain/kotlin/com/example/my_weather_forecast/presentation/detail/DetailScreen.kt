@@ -14,8 +14,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import myweatherforecast.composeapp.generated.resources.Res
+import myweatherforecast.composeapp.generated.resources.back
+import myweatherforecast.composeapp.generated.resources.forecast_title
 import myweatherforecast.composeapp.generated.resources.ic_back
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.annotation.KoinExperimentalAPI
 import org.koin.core.parameter.parametersOf
@@ -38,7 +41,7 @@ fun DetailScreen(
                 title = { Text(uiState.screenTitle()) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(painter = painterResource(Res.drawable.ic_back), contentDescription = "Back")
+                        Icon(painter = painterResource(Res.drawable.ic_back), contentDescription = stringResource(Res.string.back))
                     }
                 },
             )
@@ -54,4 +57,6 @@ fun DetailScreen(
     }
 }
 
-private fun DetailUiState.screenTitle(): String = if (this is DetailUiState.Success) forecast.location.name else "Forecast"
+@Composable
+private fun DetailUiState.screenTitle(): String =
+    if (this is DetailUiState.Success) forecast.location.name else stringResource(Res.string.forecast_title)

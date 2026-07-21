@@ -23,6 +23,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.example.my_weather_forecast.core.result.WeatherError
 import com.example.my_weather_forecast.domain.model.CurrentConditions
+import com.example.my_weather_forecast.domain.model.Units
 import com.example.my_weather_forecast.presentation.theme.readableName
 import com.example.my_weather_forecast.presentation.theme.toDrawableResource
 import kotlin.math.roundToInt
@@ -30,7 +31,20 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
+import myweatherforecast.composeapp.generated.resources.Res
+import myweatherforecast.composeapp.generated.resources.current_accessibility
+import myweatherforecast.composeapp.generated.resources.current_summary_line
+import myweatherforecast.composeapp.generated.resources.error_generic_pull_refresh
+import myweatherforecast.composeapp.generated.resources.error_network_pull_refresh
+import myweatherforecast.composeapp.generated.resources.error_not_found_weather
+import myweatherforecast.composeapp.generated.resources.error_rate_limited
+import myweatherforecast.composeapp.generated.resources.error_unauthorized_weather
+import myweatherforecast.composeapp.generated.resources.feels_like
+import myweatherforecast.composeapp.generated.resources.stale_suffix
+import myweatherforecast.composeapp.generated.resources.temp_degrees
+import myweatherforecast.composeapp.generated.resources.updated_at
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 const val DETAIL_CONTENT_TEST_TAG = "detail_content"
 
@@ -53,18 +67,20 @@ private fun LoadingContent(modifier: Modifier = Modifier) {
 
 @Composable
 private fun ErrorContent(error: WeatherError, modifier: Modifier = Modifier) {
+    val message = error.toMessage()
     Box(modifier = modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
-        Text(text = error.toMessage(), style = MaterialTheme.typography.bodyLarge)
+        Text(text = message, style = MaterialTheme.typography.bodyLarge)
     }
 }
 
+@Composable
 private fun WeatherError.toMessage(): String = when (this) {
-    WeatherError.Network -> "No internet connection. Pull to refresh to try again."
-    WeatherError.RateLimited -> "Too many requests right now. Try again in a bit."
-    WeatherError.Unauthorized -> "There's a problem reaching the weather service. Please try again later."
-    WeatherError.NotFound -> "Couldn't find weather data for this area."
+    WeatherError.Network -> stringResource(Res.string.error_network_pull_refresh)
+    WeatherError.RateLimited -> stringResource(Res.string.error_rate_limited)
+    WeatherError.Unauthorized -> stringResource(Res.string.error_unauthorized_weather)
+    WeatherError.NotFound -> stringResource(Res.string.error_not_found_weather)
     WeatherError.AtLimit, WeatherError.AlreadySaved, is WeatherError.Unknown ->
-        "Couldn't load weather. Pull to refresh to try again."
+        stringResource(Res.string.error_generic_pull_refresh)
 }
 
 @Composable
@@ -76,43 +92,49 @@ private fun SuccessContent(state: DetailUiState.Success, modifier: Modifier = Mo
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         item { UpdatedBanner(state.lastUpdated, state.stale) }
-        item { CurrentConditionsHeader(state.forecast.current) }
+        item { CurrentConditionsHeader(state.forecast.current, state.forecast.units) }
         item { HourlyRainStrip(state.forecast.hourly) }
         items(state.forecast.daily, key = { it.date.toString() }) { daily ->
-            DailyRow(daily = daily, today = today)
+            DailyRow(daily = daily, today = today, units = state.forecast.units)
         }
     }
 }
 
 @Composable
 private fun UpdatedBanner(lastUpdated: Instant, stale: Boolean, modifier: Modifier = Modifier) {
-    val label = "Updated ${lastUpdated.toClockLabel()}" + if (stale) "  ·  Data may be out of date" else ""
+    val label = stringResource(Res.string.updated_at, lastUpdated.toClockLabel()) +
+        if (stale) stringResource(Res.string.stale_suffix) else ""
     Text(text = label, style = MaterialTheme.typography.labelMedium, modifier = modifier.fillMaxWidth())
 }
 
 @Composable
-private fun CurrentConditionsHeader(current: CurrentConditions, modifier: Modifier = Modifier) {
+private fun CurrentConditionsHeader(current: CurrentConditions, units: Units, modifier: Modifier = Modifier) {
+    val conditionName = current.condition.icon.readableName()
+    val windUnitLabel = stringResource(units.windSpeedUnitLabelRes())
+    val temp = current.temp.roundToInt()
+    val feelsLike = current.feelsLike.roundToInt()
+    val windSpeed = current.windSpeed.roundToInt()
+    val popPercent = (current.pop * 100).roundToInt()
+    val accessibilityDescription = stringResource(
+        Res.string.current_accessibility,
+        conditionName, temp, feelsLike, current.humidity, windSpeed, windUnitLabel, popPercent,
+    )
+
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .semantics(mergeDescendants = true) { contentDescription = current.accessibilityDescription() },
+            .semantics(mergeDescendants = true) { contentDescription = accessibilityDescription },
     ) {
         Icon(
             painter = painterResource(current.condition.icon.toDrawableResource()),
             contentDescription = null,
             modifier = Modifier.size(56.dp),
         )
-        Text("${current.temp.roundToInt()}°", style = MaterialTheme.typography.displayMedium)
-        Text("Feels like ${current.feelsLike.roundToInt()}°", style = MaterialTheme.typography.bodyLarge)
+        Text(stringResource(Res.string.temp_degrees, temp), style = MaterialTheme.typography.displayMedium)
+        Text(stringResource(Res.string.feels_like, feelsLike), style = MaterialTheme.typography.bodyLarge)
         Text(
-            "Humidity ${current.humidity}%  ·  Wind ${current.windSpeed.roundToInt()} m/s  ·  " +
-                "${(current.pop * 100).roundToInt()}% rain",
+            stringResource(Res.string.current_summary_line, current.humidity, windSpeed, windUnitLabel, popPercent),
             style = MaterialTheme.typography.bodyMedium,
         )
     }
 }
-
-private fun CurrentConditions.accessibilityDescription(): String =
-    "${condition.icon.readableName()}, ${temp.roundToInt()} degrees, feels like ${feelsLike.roundToInt()} degrees, " +
-        "$humidity percent humidity, wind ${windSpeed.roundToInt()} meters per second, " +
-        "${(pop * 100).roundToInt()} percent chance of rain"

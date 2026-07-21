@@ -35,6 +35,9 @@ kotlin {
         iosTarget.binaries.framework {
             baseName = "ComposeApp"
             isStatic = true
+            // The SQLDelight native driver's cinterop bindings call into libsqlite3 directly;
+            // a static framework doesn't pull that in automatically, so Xcode's linker needs it explicitly.
+            linkerOpts.add("-lsqlite3")
         }
     }
     
@@ -76,10 +79,12 @@ kotlin {
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.lifecycle.viewmodel)
             implementation(libs.navigation.compose)
+            implementation(libs.multiplatform.settings)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
             implementation(libs.kotlinx.coroutines.test)
+            implementation(libs.multiplatform.settings.test)
             implementation(libs.turbine)
             implementation(libs.ktor.client.mock)
         }

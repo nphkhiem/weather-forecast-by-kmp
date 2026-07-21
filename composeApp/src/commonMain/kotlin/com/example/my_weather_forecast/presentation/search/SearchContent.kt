@@ -21,6 +21,16 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.example.my_weather_forecast.core.result.WeatherError
 import com.example.my_weather_forecast.domain.model.Location
+import myweatherforecast.composeapp.generated.resources.Res
+import myweatherforecast.composeapp.generated.resources.error_generic_search
+import myweatherforecast.composeapp.generated.resources.error_network_try_again
+import myweatherforecast.composeapp.generated.resources.error_not_found_search
+import myweatherforecast.composeapp.generated.resources.error_rate_limited
+import myweatherforecast.composeapp.generated.resources.error_unauthorized_search
+import myweatherforecast.composeapp.generated.resources.location_result_accessibility
+import myweatherforecast.composeapp.generated.resources.location_subtitle_with_state
+import myweatherforecast.composeapp.generated.resources.search_label
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun SearchContent(
@@ -34,7 +44,7 @@ fun SearchContent(
         OutlinedTextField(
             value = query,
             onValueChange = onQueryChange,
-            label = { Text("Search for a city") },
+            label = { Text(stringResource(Res.string.search_label)) },
             singleLine = true,
             modifier = Modifier
                 .fillMaxWidth()
@@ -43,8 +53,11 @@ fun SearchContent(
         when (uiState) {
             is SearchUiState.Idle -> Unit
             is SearchUiState.Loading -> LoadingRow()
-            is SearchUiState.Empty -> MessageRow("No cities found. Try a different search.")
-            is SearchUiState.Error -> MessageRow(uiState.error.toMessage())
+            is SearchUiState.Empty -> MessageRow(stringResource(Res.string.error_not_found_search))
+            is SearchUiState.Error -> {
+                val message = uiState.error.toMessage()
+                MessageRow(message)
+            }
             is SearchUiState.Results -> ResultsList(uiState.locations, onLocationClick)
         }
     }
@@ -64,12 +77,13 @@ private fun MessageRow(message: String, modifier: Modifier = Modifier) {
     }
 }
 
+@Composable
 private fun WeatherError.toMessage(): String = when (this) {
-    WeatherError.Network -> "No internet connection. Try again."
-    WeatherError.RateLimited -> "Too many requests right now. Try again in a bit."
-    WeatherError.Unauthorized -> "There's a problem reaching the search service. Please try again later."
-    WeatherError.NotFound -> "No cities found. Try a different search."
-    WeatherError.AtLimit, WeatherError.AlreadySaved, is WeatherError.Unknown -> "Something went wrong. Try again."
+    WeatherError.Network -> stringResource(Res.string.error_network_try_again)
+    WeatherError.RateLimited -> stringResource(Res.string.error_rate_limited)
+    WeatherError.Unauthorized -> stringResource(Res.string.error_unauthorized_search)
+    WeatherError.NotFound -> stringResource(Res.string.error_not_found_search)
+    WeatherError.AtLimit, WeatherError.AlreadySaved, is WeatherError.Unknown -> stringResource(Res.string.error_generic_search)
 }
 
 @Composable
@@ -92,14 +106,17 @@ private fun SearchResultRow(
     modifier: Modifier = Modifier,
 ) {
     val subtitle = location.subtitle()
+    val accessibilityDescription = stringResource(Res.string.location_result_accessibility, location.name, subtitle)
     ListItem(
         headlineContent = { Text(location.name) },
         supportingContent = { Text(subtitle) },
         modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .semantics { contentDescription = "${location.name}, $subtitle" },
+            .semantics { contentDescription = accessibilityDescription },
     )
 }
 
-private fun Location.subtitle(): String = if (state != null) "$state, $country" else country
+@Composable
+private fun Location.subtitle(): String =
+    if (state != null) stringResource(Res.string.location_subtitle_with_state, state, country) else country

@@ -13,6 +13,7 @@ import com.example.my_weather_forecast.domain.model.ForecastObservation
 import com.example.my_weather_forecast.domain.model.Location
 import com.example.my_weather_forecast.presentation.theme.WeatherForecastTheme
 import com.example.my_weather_forecast.testutil.FakeSavedLocationRepository
+import com.example.my_weather_forecast.testutil.FakeUnitsPreference
 import com.example.my_weather_forecast.testutil.FakeWeatherRepository
 import com.example.my_weather_forecast.testutil.sampleForecast
 import kotlinx.coroutines.runBlocking
@@ -35,6 +36,7 @@ class DetailScreenTest {
             locationId = chicago.id,
             savedLocationRepository = savedLocationRepository,
             weatherRepository = weatherRepository,
+            unitsPreference = FakeUnitsPreference(),
         )
 
     private fun setContentWithArea(): FakeWeatherRepository {
@@ -102,7 +104,7 @@ class DetailScreenTest {
             }
         }
 
-        composeTestRule.onNodeWithText("Couldn't find weather data for this area.").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Could not find weather data for this area.").assertIsDisplayed()
     }
 
     @Test

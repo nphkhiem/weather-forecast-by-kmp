@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <string name="back">Back</string>
+    <string name="app_title">Weather</string>
+
+    <string name="add_area">Add area</string>
+    <string name="more_options">More options</string>
+    <string name="units_metric">Metric (°C)</string>
+    <string name="units_imperial">Imperial (°F)</string>
+    <string name="units_selected_checkmark">✓</string>
+    <string name="undo">Undo</string>
+    <string name="overview_empty">No saved areas yet. Tap + to add one.</string>
+    <string name="area_removed">%1$s removed</string>
+    <string name="refresh_partial_failure">Some areas could not be refreshed</string>
+    <string name="delete_area">Delete %1$s</string>
+    <string name="area_summary_line">H:%1$d°  L:%2$d°  %3$d% rain</string>
+    <string name="area_accessibility">%1$s, %2$d degrees, high %3$d, low %4$d, %5$d percent chance of rain%6$s</string>
+    <string name="area_accessibility_stale_suffix">, data may be out of date</string>
+
+    <string name="error_network_pull_refresh">No internet connection. Pull to refresh to try again.</string>
+    <string name="error_network_try_again">No internet connection. Try again.</string>
+    <string name="error_rate_limited">Too many requests right now. Try again in a bit.</string>
+    <string name="error_unauthorized_weather">There is a problem reaching the weather service. Please try again later.</string>
+    <string name="error_unauthorized_search">There is a problem reaching the search service. Please try again later.</string>
+    <string name="error_not_found_weather">Could not find weather data for this area.</string>
+    <string name="error_not_found_search">No cities found. Try a different search.</string>
+    <string name="error_generic_pull_refresh">Could not load weather. Pull to refresh to try again.</string>
+    <string name="error_generic_search">Something went wrong. Try again.</string>
+
+    <string name="search_label">Search for a city</string>
+    <string name="search_at_limit">You can save up to 6 areas</string>
+    <string name="search_already_saved">This area is already saved</string>
+    <string name="search_add_failed">Could not add this area</string>
+    <string name="add_area_title">Add area</string>
+    <string name="location_subtitle_with_state">%1$s, %2$s</string>
+    <string name="location_result_accessibility">%1$s, %2$s</string>
+
+    <string name="forecast_title">Forecast</string>
+    <string name="updated_at">Updated %1$s</string>
+    <string name="stale_suffix">  ·  Data may be out of date</string>
+    <string name="temp_degrees">%1$d°</string>
+    <string name="feels_like">Feels like %1$d°</string>
+    <string name="current_summary_line">Humidity %1$d%  ·  Wind %2$d %3$s  ·  %4$d% rain</string>
+    <string name="current_accessibility">%1$s, %2$d degrees, feels like %3$d degrees, %4$d percent humidity, wind %5$d %6$s, %7$d percent chance of rain</string>
+    <string name="daily_temp_range">%1$d° / %2$d°</string>
+    <string name="daily_summary_line">%1$d% rain  ·  Wind %2$d %3$s  ·  Humidity %4$d%</string>
+    <string name="daily_accessibility">%1$s, %2$s, high %3$d, low %4$d, %5$d percent chance of rain, wind %6$d %7$s, %8$d percent humidity</string>
+    <string name="hourly_pop_accessibility">%1$s, %2$d percent chance of rain</string>
+    <string name="hourly_pop_percent">%1$d%</string>
+    <string name="day_today">Today</string>
+    <string name="day_mon">Mon</string>
+    <string name="day_tue">Tue</string>
+    <string name="day_wed">Wed</string>
+    <string name="day_thu">Thu</string>
+    <string name="day_fri">Fri</string>
+    <string name="day_sat">Sat</string>
+    <string name="day_sun">Sun</string>
+    <string name="unit_mps">m/s</string>
+    <string name="unit_mph">mph</string>
+
+    <string name="condition_thunderstorm">Thunderstorm</string>
+    <string name="condition_drizzle">Drizzle</string>
+    <string name="condition_rain">Rain</string>
+    <string name="condition_snow">Snow</string>
+    <string name="condition_atmosphere">Mist</string>
+    <string name="condition_clear">Clear</string>
+    <string name="condition_clouds">Clouds</string>
+    <string name="condition_unknown">Unknown conditions</string>
+</resources>

@@ -2,6 +2,7 @@ package com.example.my_weather_forecast.presentation.detail
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.my_weather_forecast.core.preference.UnitsPreference
 import com.example.my_weather_forecast.core.result.WeatherError
 import com.example.my_weather_forecast.domain.model.ForecastObservation
 import com.example.my_weather_forecast.domain.model.Location
@@ -13,6 +14,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -24,10 +26,8 @@ class DetailViewModel(
     private val locationId: Long,
     savedLocationRepository: SavedLocationRepository,
     private val weatherRepository: WeatherRepository,
+    private val unitsPreference: UnitsPreference,
 ) : ViewModel() {
-
-    // Fixed until T6.1 adds a real units preference.
-    private val units = Units.METRIC
 
     private var latestLocation: Location? = null
 
@@ -35,13 +35,16 @@ class DetailViewModel(
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val uiState: StateFlow<DetailUiState> = savedLocationRepository.observeAll()
-        .map { locations -> locations.find { it.id == locationId } }
-        .onEach { latestLocation = it }
-        .flatMapLatest { location -> observeForecast(location) }
+    val uiState: StateFlow<DetailUiState> = combine(
+        savedLocationRepository.observeAll()
+            .map { locations -> locations.find { it.id == locationId } }
+            .onEach { latestLocation = it },
+        unitsPreference.units,
+    ) { location, units -> location to units }
+        .flatMapLatest { (location, units) -> observeForecast(location, units) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), DetailUiState.Loading)
 
-    private fun observeForecast(location: Location?) =
+    private fun observeForecast(location: Location?, units: Units) =
         if (location == null) {
             flowOf(DetailUiState.Error(WeatherError.NotFound))
         } else {
@@ -59,7 +62,7 @@ class DetailViewModel(
         viewModelScope.launch {
             _isRefreshing.value = true
             try {
-                weatherRepository.refresh(location, units)
+                weatherRepository.refresh(location, unitsPreference.units.value)
             } finally {
                 _isRefreshing.value = false
             }
