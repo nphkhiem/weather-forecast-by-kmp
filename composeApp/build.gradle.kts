@@ -35,6 +35,9 @@ kotlin {
         iosTarget.binaries.framework {
             baseName = "ComposeApp"
             isStatic = true
+            // The SQLDelight native driver's cinterop bindings call into libsqlite3 directly;
+            // a static framework doesn't pull that in automatically, so Xcode's linker needs it explicitly.
+            linkerOpts.add("-lsqlite3")
         }
     }
     
