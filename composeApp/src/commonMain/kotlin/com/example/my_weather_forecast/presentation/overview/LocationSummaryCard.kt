@@ -27,8 +27,14 @@ import com.example.my_weather_forecast.presentation.theme.readableName
 import com.example.my_weather_forecast.presentation.theme.toDrawableResource
 import kotlin.math.roundToInt
 import myweatherforecast.composeapp.generated.resources.Res
+import myweatherforecast.composeapp.generated.resources.area_accessibility
+import myweatherforecast.composeapp.generated.resources.area_accessibility_stale_suffix
+import myweatherforecast.composeapp.generated.resources.area_summary_line
+import myweatherforecast.composeapp.generated.resources.delete_area
 import myweatherforecast.composeapp.generated.resources.ic_delete
+import myweatherforecast.composeapp.generated.resources.temp_degrees
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,6 +55,16 @@ fun LocationSummaryCard(
         },
     )
 
+    val todayHigh = area.todayHigh.roundToInt()
+    val todayLow = area.todayLow.roundToInt()
+    val rainChance = (area.rainChance * 100).roundToInt()
+    val currentTemp = area.currentTemp.roundToInt()
+    val staleSuffix = if (area.stale) stringResource(Res.string.area_accessibility_stale_suffix) else ""
+    val accessibilityDescription = stringResource(
+        Res.string.area_accessibility,
+        area.name, currentTemp, todayHigh, todayLow, rainChance, staleSuffix,
+    )
+
     SwipeToDismissBox(
         state = dismissState,
         modifier = modifier,
@@ -63,7 +79,7 @@ fun LocationSummaryCard(
             ) {
                 Icon(
                     painter = painterResource(Res.drawable.ic_delete),
-                    contentDescription = "Delete ${area.name}",
+                    contentDescription = stringResource(Res.string.delete_area, area.name),
                     tint = MaterialTheme.colorScheme.onErrorContainer,
                 )
             }
@@ -74,7 +90,7 @@ fun LocationSummaryCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(min = 48.dp)
-                .semantics { contentDescription = area.accessibilityDescription() },
+                .semantics { contentDescription = accessibilityDescription },
         ) {
             Row(
                 modifier = Modifier.padding(16.dp).fillMaxWidth(),
@@ -89,19 +105,12 @@ fun LocationSummaryCard(
                 Column(modifier = Modifier.padding(start = 16.dp).weight(1f)) {
                     Text(area.name, style = MaterialTheme.typography.titleMedium)
                     Text(
-                        "H:${area.todayHigh.roundToInt()}°  L:${area.todayLow.roundToInt()}°  " +
-                            "${(area.rainChance * 100).roundToInt()}% rain",
+                        stringResource(Res.string.area_summary_line, todayHigh, todayLow, rainChance),
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 }
-                Text("${area.currentTemp.roundToInt()}°", style = MaterialTheme.typography.headlineSmall)
+                Text(stringResource(Res.string.temp_degrees, currentTemp), style = MaterialTheme.typography.headlineSmall)
             }
         }
     }
-}
-
-private fun AreaSummary.accessibilityDescription(): String {
-    val staleNote = if (stale) ", data may be out of date" else ""
-    return "$name, ${currentTemp.roundToInt()} degrees, high ${todayHigh.roundToInt()}, " +
-        "low ${todayLow.roundToInt()}, ${(rainChance * 100).roundToInt()} percent chance of rain$staleNote"
 }

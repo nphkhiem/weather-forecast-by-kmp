@@ -25,9 +25,20 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.my_weather_forecast.domain.model.Units
 import myweatherforecast.composeapp.generated.resources.Res
+import myweatherforecast.composeapp.generated.resources.add_area
+import myweatherforecast.composeapp.generated.resources.app_title
+import myweatherforecast.composeapp.generated.resources.area_removed
 import myweatherforecast.composeapp.generated.resources.ic_add
 import myweatherforecast.composeapp.generated.resources.ic_more_vert
+import myweatherforecast.composeapp.generated.resources.more_options
+import myweatherforecast.composeapp.generated.resources.refresh_partial_failure
+import myweatherforecast.composeapp.generated.resources.undo
+import myweatherforecast.composeapp.generated.resources.units_imperial
+import myweatherforecast.composeapp.generated.resources.units_metric
+import myweatherforecast.composeapp.generated.resources.units_selected_checkmark
+import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.annotation.KoinExperimentalAPI
 
@@ -43,15 +54,18 @@ fun OverviewScreen(
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val units by viewModel.units.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+    val undoLabel = stringResource(Res.string.undo)
 
     LaunchedEffect(viewModel) {
         viewModel.events.collect { event ->
             when (event) {
                 is OverviewEvent.OpenDetail -> onOpenDetail(event.locationId)
-                is OverviewEvent.ShowMessage -> {
+                is OverviewEvent.RefreshPartiallyFailed ->
+                    snackbarHostState.showSnackbar(getString(Res.string.refresh_partial_failure))
+                is OverviewEvent.AreaRemoved -> {
                     val result = snackbarHostState.showSnackbar(
-                        message = event.message,
-                        actionLabel = if (event.undoable) "Undo" else null,
+                        message = getString(Res.string.area_removed, event.name),
+                        actionLabel = undoLabel,
                     )
                     if (result == SnackbarResult.ActionPerformed) {
                         viewModel.undoRemove()
@@ -66,13 +80,13 @@ fun OverviewScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text("Weather") },
+                title = { Text(stringResource(Res.string.app_title)) },
                 actions = { UnitsMenu(units = units, onUnitsSelected = viewModel::setUnits) },
             )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = onOpenSearch) {
-                Icon(painter = painterResource(Res.drawable.ic_add), contentDescription = "Add area")
+                Icon(painter = painterResource(Res.drawable.ic_add), contentDescription = stringResource(Res.string.add_area))
             }
         },
     ) { paddingValues ->
@@ -96,20 +110,20 @@ private fun UnitsMenu(units: Units, onUnitsSelected: (Units) -> Unit, modifier: 
     var expanded by remember { mutableStateOf(false) }
 
     IconButton(onClick = { expanded = true }, modifier = modifier) {
-        Icon(painter = painterResource(Res.drawable.ic_more_vert), contentDescription = "Settings")
+        Icon(painter = painterResource(Res.drawable.ic_more_vert), contentDescription = stringResource(Res.string.more_options))
     }
     DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
         DropdownMenuItem(
-            text = { Text("Metric (°C)") },
-            trailingIcon = { if (units == Units.METRIC) Text("✓") },
+            text = { Text(stringResource(Res.string.units_metric)) },
+            trailingIcon = { if (units == Units.METRIC) Text(stringResource(Res.string.units_selected_checkmark)) },
             onClick = {
                 onUnitsSelected(Units.METRIC)
                 expanded = false
             },
         )
         DropdownMenuItem(
-            text = { Text("Imperial (°F)") },
-            trailingIcon = { if (units == Units.IMPERIAL) Text("✓") },
+            text = { Text(stringResource(Res.string.units_imperial)) },
+            trailingIcon = { if (units == Units.IMPERIAL) Text(stringResource(Res.string.units_selected_checkmark)) },
             onClick = {
                 onUnitsSelected(Units.IMPERIAL)
                 expanded = false

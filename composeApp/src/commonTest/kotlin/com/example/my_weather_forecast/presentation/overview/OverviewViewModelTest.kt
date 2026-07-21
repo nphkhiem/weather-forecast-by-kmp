@@ -89,9 +89,7 @@ class OverviewViewModelTest {
 
             viewModel.events.test {
                 viewModel.refresh()
-                val event = awaitItem()
-                assertIs<OverviewEvent.ShowMessage>(event)
-                assertEquals(false, event.undoable)
+                assertEquals(OverviewEvent.RefreshPartiallyFailed, awaitItem())
             }
             expectNoEvents()
         }
@@ -164,9 +162,7 @@ class OverviewViewModelTest {
                 viewModel.removeArea(chicago.id)
                 assertEquals(OverviewUiState.Empty, awaitItem())
             }
-            val event = awaitItem()
-            assertIs<OverviewEvent.ShowMessage>(event)
-            assertEquals(true, event.undoable)
+            assertEquals(OverviewEvent.AreaRemoved(chicago.name), awaitItem())
         }
     }
 

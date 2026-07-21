@@ -16,6 +16,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.example.my_weather_forecast.core.result.WeatherError
+import myweatherforecast.composeapp.generated.resources.Res
+import myweatherforecast.composeapp.generated.resources.error_generic_pull_refresh
+import myweatherforecast.composeapp.generated.resources.error_network_pull_refresh
+import myweatherforecast.composeapp.generated.resources.error_not_found_weather
+import myweatherforecast.composeapp.generated.resources.error_rate_limited
+import myweatherforecast.composeapp.generated.resources.error_unauthorized_weather
+import myweatherforecast.composeapp.generated.resources.overview_empty
+import org.jetbrains.compose.resources.stringResource
 
 const val OVERVIEW_CONTENT_TEST_TAG = "overview_content"
 
@@ -46,7 +54,7 @@ private fun LoadingContent(modifier: Modifier = Modifier) {
 private fun EmptyContent(modifier: Modifier = Modifier) {
     Box(modifier = modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
         Text(
-            text = "No saved areas yet. Tap + to add one.",
+            text = stringResource(Res.string.overview_empty),
             style = MaterialTheme.typography.bodyLarge,
         )
     }
@@ -54,21 +62,23 @@ private fun EmptyContent(modifier: Modifier = Modifier) {
 
 @Composable
 private fun ErrorContent(error: WeatherError, modifier: Modifier = Modifier) {
+    val message = error.toMessage()
     Box(modifier = modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
         Text(
-            text = error.toMessage(),
+            text = message,
             style = MaterialTheme.typography.bodyLarge,
         )
     }
 }
 
+@Composable
 private fun WeatherError.toMessage(): String = when (this) {
-    WeatherError.Network -> "No internet connection. Pull to refresh to try again."
-    WeatherError.RateLimited -> "Too many requests right now. Try again in a bit."
-    WeatherError.Unauthorized -> "There's a problem reaching the weather service. Please try again later."
-    WeatherError.NotFound -> "Couldn't find weather data for this area."
+    WeatherError.Network -> stringResource(Res.string.error_network_pull_refresh)
+    WeatherError.RateLimited -> stringResource(Res.string.error_rate_limited)
+    WeatherError.Unauthorized -> stringResource(Res.string.error_unauthorized_weather)
+    WeatherError.NotFound -> stringResource(Res.string.error_not_found_weather)
     WeatherError.AtLimit, WeatherError.AlreadySaved, is WeatherError.Unknown ->
-        "Couldn't load weather. Pull to refresh to try again."
+        stringResource(Res.string.error_generic_pull_refresh)
 }
 
 @Composable

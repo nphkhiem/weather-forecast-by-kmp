@@ -104,7 +104,7 @@ class DetailScreenTest {
             }
         }
 
-        composeTestRule.onNodeWithText("Couldn't find weather data for this area.").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Could not find weather data for this area.").assertIsDisplayed()
     }
 
     @Test

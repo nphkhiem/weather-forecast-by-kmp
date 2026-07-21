@@ -66,8 +66,8 @@ class SearchViewModel(
                 is AppResult.Success -> _events.emit(SearchEvent.Added)
                 is AppResult.Failure -> when (result.error) {
                     WeatherError.AtLimit -> _events.emit(SearchEvent.AtLimit)
-                    WeatherError.AlreadySaved -> _events.emit(SearchEvent.ShowMessage("This area is already saved"))
-                    else -> _events.emit(SearchEvent.ShowMessage("Couldn't add this area"))
+                    WeatherError.AlreadySaved -> _events.emit(SearchEvent.AlreadySaved)
+                    else -> _events.emit(SearchEvent.AddFailed)
                 }
             }
         }

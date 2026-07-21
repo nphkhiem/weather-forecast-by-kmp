@@ -111,7 +111,7 @@ class OverviewScreenTest {
     fun givenTheSettingsMenu_whenImperialSelected_thenWeatherRepositoryObservesWithImperialUnits() {
         val (_, weatherRepository) = setContentWithArea()
 
-        composeTestRule.onNodeWithContentDescription("Settings").performClick()
+        composeTestRule.onNodeWithContentDescription("More options").performClick()
         composeTestRule.onNodeWithText("Imperial (°F)").performClick()
         composeTestRule.waitForIdle()
 

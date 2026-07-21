@@ -110,7 +110,7 @@ class OverviewViewModel(
                         .any { it is AppResult.Failure }
                 }
                 if (anyFailed) {
-                    _events.emit(OverviewEvent.ShowMessage("Some areas couldn't be refreshed"))
+                    _events.emit(OverviewEvent.RefreshPartiallyFailed)
                 }
             } finally {
                 _isRefreshing.value = false
@@ -127,7 +127,7 @@ class OverviewViewModel(
             val removed = latestLocations.find { it.id == id } ?: return@launch
             removeLocationUseCase(id)
             lastRemovedLocation = removed
-            _events.emit(OverviewEvent.ShowMessage("${removed.name} removed", undoable = true))
+            _events.emit(OverviewEvent.AreaRemoved(removed.name))
         }
     }
 
