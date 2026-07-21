@@ -12,7 +12,7 @@ import org.koin.dsl.module
 // definition that koinViewModel() can resolve.
 @Suppress("DEPRECATION")
 val presentationModule = module {
-    viewModel { OverviewViewModel(get(), get(), get(), get()) }
+    viewModel { OverviewViewModel(get(), get(), get(), get(), get()) }
     viewModel { SearchViewModel(get(), get()) }
-    viewModel { (locationId: Long) -> DetailViewModel(locationId, get(), get()) }
+    viewModel { (locationId: Long) -> DetailViewModel(locationId, get(), get(), get()) }
 }

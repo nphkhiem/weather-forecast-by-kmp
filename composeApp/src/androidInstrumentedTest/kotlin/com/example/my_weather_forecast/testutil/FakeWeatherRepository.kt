@@ -13,6 +13,8 @@ class FakeWeatherRepository : WeatherRepository {
     var refreshResult: AppResult<Unit> = AppResult.Success(Unit)
     var refreshCallCount = 0
         private set
+    var lastObservedUnits: Units? = null
+        private set
 
     fun setObservation(locationId: Long, observation: ForecastObservation) {
         stateFor(locationId).value = observation
@@ -20,7 +22,10 @@ class FakeWeatherRepository : WeatherRepository {
 
     private fun stateFor(locationId: Long) = observations.getOrPut(locationId) { MutableStateFlow(ForecastObservation.Loading) }
 
-    override fun observe(location: Location, units: Units): Flow<ForecastObservation> = stateFor(location.id)
+    override fun observe(location: Location, units: Units): Flow<ForecastObservation> {
+        lastObservedUnits = units
+        return stateFor(location.id)
+    }
 
     override suspend fun refresh(location: Location, units: Units): AppResult<Unit> {
         refreshCallCount++

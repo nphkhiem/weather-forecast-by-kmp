@@ -5,14 +5,18 @@ import com.example.my_weather_forecast.core.result.AppResult
 import com.example.my_weather_forecast.core.result.WeatherError
 import com.example.my_weather_forecast.domain.model.ForecastObservation
 import com.example.my_weather_forecast.domain.model.Location
+import com.example.my_weather_forecast.domain.model.Units
 import com.example.my_weather_forecast.domain.usecase.AddLocationUseCase
 import com.example.my_weather_forecast.domain.usecase.ObserveSavedLocationsUseCase
 import com.example.my_weather_forecast.domain.usecase.RemoveLocationUseCase
 import com.example.my_weather_forecast.testutil.FakeSavedLocationRepository
+import com.example.my_weather_forecast.testutil.FakeUnitsPreference
 import com.example.my_weather_forecast.testutil.FakeWeatherRepository
 import com.example.my_weather_forecast.testutil.runMainDispatcherTest
 import com.example.my_weather_forecast.testutil.sampleForecast
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
@@ -21,6 +25,7 @@ class OverviewViewModelTest {
 
     private val savedLocationRepository = FakeSavedLocationRepository()
     private val weatherRepository = FakeWeatherRepository()
+    private val unitsPreference = FakeUnitsPreference()
 
     private val chicago = Location(
         id = 1, name = "Chicago", country = "US", state = "IL", lat = 41.85, lon = -87.65, sortOrder = 0,
@@ -32,6 +37,7 @@ class OverviewViewModelTest {
             removeLocationUseCase = RemoveLocationUseCase(savedLocationRepository),
             addLocationUseCase = AddLocationUseCase(savedLocationRepository),
             weatherRepository = weatherRepository,
+            unitsPreference = unitsPreference,
         )
         body(viewModel)
     }
@@ -107,6 +113,35 @@ class OverviewViewModelTest {
                 assertEquals(false, awaitItem())
             }
         }
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun givenUnitsPreferenceChanges_whenObserved_thenWeatherRepositoryObservesWithTheNewUnits() = testOverview { viewModel ->
+        savedLocationRepository.add(chicago)
+        weatherRepository.setObservation(chicago.id, ForecastObservation.Success(sampleForecast(chicago), stale = false))
+
+        viewModel.uiState.test {
+            awaitItem()
+            awaitItem()
+            assertEquals(Units.METRIC, weatherRepository.lastObservedUnits)
+
+            // The fake returns the same cached forecast regardless of units, so the resulting
+            // uiState is value-equal and StateFlow conflates it away; assert the side effect
+            // (which units observe() was actually called with) instead of awaiting a new item.
+            unitsPreference.setUnits(Units.IMPERIAL)
+            advanceUntilIdle()
+            assertEquals(Units.IMPERIAL, weatherRepository.lastObservedUnits)
+
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun whenSetUnitsCalled_thenUnitsPreferenceIsUpdated() = testOverview { viewModel ->
+        viewModel.setUnits(Units.IMPERIAL)
+
+        assertEquals(Units.IMPERIAL, unitsPreference.units.value)
     }
 
     @Test

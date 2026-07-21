@@ -17,6 +17,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.example.my_weather_forecast.domain.model.DailyForecast
+import com.example.my_weather_forecast.domain.model.Units
 import com.example.my_weather_forecast.presentation.theme.readableName
 import com.example.my_weather_forecast.presentation.theme.toDrawableResource
 import kotlin.math.roundToInt
@@ -25,12 +26,12 @@ import kotlinx.datetime.LocalDate
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
-fun DailyRow(daily: DailyForecast, today: LocalDate, modifier: Modifier = Modifier) {
+fun DailyRow(daily: DailyForecast, today: LocalDate, units: Units, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
-            .semantics(mergeDescendants = true) { contentDescription = daily.accessibilityDescription(today) },
+            .semantics(mergeDescendants = true) { contentDescription = daily.accessibilityDescription(today, units) },
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Text(
@@ -49,7 +50,7 @@ fun DailyRow(daily: DailyForecast, today: LocalDate, modifier: Modifier = Modifi
             )
         }
         Text(
-            text = "${(daily.pop * 100).roundToInt()}% rain  ·  Wind ${daily.windSpeed.roundToInt()} m/s  ·  " +
+            text = "${(daily.pop * 100).roundToInt()}% rain  ·  Wind ${daily.windSpeed.roundToInt()} ${units.windSpeedUnitLabel()}  ·  " +
                 "Humidity ${daily.humidity}%",
             style = MaterialTheme.typography.bodySmall,
             modifier = Modifier.padding(start = 60.dp),
@@ -57,10 +58,10 @@ fun DailyRow(daily: DailyForecast, today: LocalDate, modifier: Modifier = Modifi
     }
 }
 
-private fun DailyForecast.accessibilityDescription(today: LocalDate): String {
+private fun DailyForecast.accessibilityDescription(today: LocalDate, units: Units): String {
     val day = date.dayLabel(today)
     return "$day, ${condition.icon.readableName()}, high ${tempMax.roundToInt()}, low ${tempMin.roundToInt()}, " +
-        "${(pop * 100).roundToInt()} percent chance of rain, wind ${windSpeed.roundToInt()} meters per second, " +
+        "${(pop * 100).roundToInt()} percent chance of rain, wind ${windSpeed.roundToInt()} ${units.windSpeedUnitLabel()}, " +
         "$humidity percent humidity"
 }
 

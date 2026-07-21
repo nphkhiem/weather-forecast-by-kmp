@@ -23,6 +23,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.example.my_weather_forecast.core.result.WeatherError
 import com.example.my_weather_forecast.domain.model.CurrentConditions
+import com.example.my_weather_forecast.domain.model.Units
 import com.example.my_weather_forecast.presentation.theme.readableName
 import com.example.my_weather_forecast.presentation.theme.toDrawableResource
 import kotlin.math.roundToInt
@@ -76,10 +77,10 @@ private fun SuccessContent(state: DetailUiState.Success, modifier: Modifier = Mo
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         item { UpdatedBanner(state.lastUpdated, state.stale) }
-        item { CurrentConditionsHeader(state.forecast.current) }
+        item { CurrentConditionsHeader(state.forecast.current, state.forecast.units) }
         item { HourlyRainStrip(state.forecast.hourly) }
         items(state.forecast.daily, key = { it.date.toString() }) { daily ->
-            DailyRow(daily = daily, today = today)
+            DailyRow(daily = daily, today = today, units = state.forecast.units)
         }
     }
 }
@@ -91,11 +92,11 @@ private fun UpdatedBanner(lastUpdated: Instant, stale: Boolean, modifier: Modifi
 }
 
 @Composable
-private fun CurrentConditionsHeader(current: CurrentConditions, modifier: Modifier = Modifier) {
+private fun CurrentConditionsHeader(current: CurrentConditions, units: Units, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .semantics(mergeDescendants = true) { contentDescription = current.accessibilityDescription() },
+            .semantics(mergeDescendants = true) { contentDescription = current.accessibilityDescription(units) },
     ) {
         Icon(
             painter = painterResource(current.condition.icon.toDrawableResource()),
@@ -105,14 +106,14 @@ private fun CurrentConditionsHeader(current: CurrentConditions, modifier: Modifi
         Text("${current.temp.roundToInt()}°", style = MaterialTheme.typography.displayMedium)
         Text("Feels like ${current.feelsLike.roundToInt()}°", style = MaterialTheme.typography.bodyLarge)
         Text(
-            "Humidity ${current.humidity}%  ·  Wind ${current.windSpeed.roundToInt()} m/s  ·  " +
+            "Humidity ${current.humidity}%  ·  Wind ${current.windSpeed.roundToInt()} ${units.windSpeedUnitLabel()}  ·  " +
                 "${(current.pop * 100).roundToInt()}% rain",
             style = MaterialTheme.typography.bodyMedium,
         )
     }
 }
 
-private fun CurrentConditions.accessibilityDescription(): String =
+private fun CurrentConditions.accessibilityDescription(units: Units): String =
     "${condition.icon.readableName()}, ${temp.roundToInt()} degrees, feels like ${feelsLike.roundToInt()} degrees, " +
-        "$humidity percent humidity, wind ${windSpeed.roundToInt()} meters per second, " +
+        "$humidity percent humidity, wind ${windSpeed.roundToInt()} ${units.windSpeedUnitLabel()}, " +
         "${(pop * 100).roundToInt()} percent chance of rain"

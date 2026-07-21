@@ -2,22 +2,31 @@ package com.example.my_weather_forecast.presentation.overview
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.my_weather_forecast.domain.model.Units
 import myweatherforecast.composeapp.generated.resources.Res
 import myweatherforecast.composeapp.generated.resources.ic_add
+import myweatherforecast.composeapp.generated.resources.ic_more_vert
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.annotation.KoinExperimentalAPI
@@ -32,6 +41,7 @@ fun OverviewScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
+    val units by viewModel.units.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(viewModel) {
@@ -54,6 +64,12 @@ fun OverviewScreen(
     Scaffold(
         modifier = modifier,
         snackbarHost = { SnackbarHost(snackbarHostState) },
+        topBar = {
+            TopAppBar(
+                title = { Text("Weather") },
+                actions = { UnitsMenu(units = units, onUnitsSelected = viewModel::setUnits) },
+            )
+        },
         floatingActionButton = {
             FloatingActionButton(onClick = onOpenSearch) {
                 Icon(painter = painterResource(Res.drawable.ic_add), contentDescription = "Add area")
@@ -72,5 +88,32 @@ fun OverviewScreen(
                 modifier = Modifier.fillMaxSize(),
             )
         }
+    }
+}
+
+@Composable
+private fun UnitsMenu(units: Units, onUnitsSelected: (Units) -> Unit, modifier: Modifier = Modifier) {
+    var expanded by remember { mutableStateOf(false) }
+
+    IconButton(onClick = { expanded = true }, modifier = modifier) {
+        Icon(painter = painterResource(Res.drawable.ic_more_vert), contentDescription = "Settings")
+    }
+    DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+        DropdownMenuItem(
+            text = { Text("Metric (°C)") },
+            trailingIcon = { if (units == Units.METRIC) Text("✓") },
+            onClick = {
+                onUnitsSelected(Units.METRIC)
+                expanded = false
+            },
+        )
+        DropdownMenuItem(
+            text = { Text("Imperial (°F)") },
+            trailingIcon = { if (units == Units.IMPERIAL) Text("✓") },
+            onClick = {
+                onUnitsSelected(Units.IMPERIAL)
+                expanded = false
+            },
+        )
     }
 }

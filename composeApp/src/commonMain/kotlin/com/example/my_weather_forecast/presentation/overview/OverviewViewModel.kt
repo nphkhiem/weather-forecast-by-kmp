@@ -2,6 +2,7 @@ package com.example.my_weather_forecast.presentation.overview
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.my_weather_forecast.core.preference.UnitsPreference
 import com.example.my_weather_forecast.core.result.AppResult
 import com.example.my_weather_forecast.domain.model.Forecast
 import com.example.my_weather_forecast.domain.model.ForecastObservation
@@ -33,10 +34,10 @@ class OverviewViewModel(
     private val removeLocationUseCase: RemoveLocationUseCase,
     private val addLocationUseCase: AddLocationUseCase,
     private val weatherRepository: WeatherRepository,
+    private val unitsPreference: UnitsPreference,
 ) : ViewModel() {
 
-    // Fixed until T6.1 adds a real units preference.
-    private val units = Units.METRIC
+    val units: StateFlow<Units> = unitsPreference.units
 
     private val _events = MutableSharedFlow<OverviewEvent>()
     val events: SharedFlow<OverviewEvent> = _events.asSharedFlow()
@@ -48,14 +49,16 @@ class OverviewViewModel(
     private var lastRemovedLocation: Location? = null
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val uiState: StateFlow<OverviewUiState> = observeSavedLocationsUseCase()
-        .onEach { latestLocations = it }
-        .flatMapLatest { locations -> observeAreas(locations) }
+    val uiState: StateFlow<OverviewUiState> = combine(
+        observeSavedLocationsUseCase().onEach { latestLocations = it },
+        unitsPreference.units,
+    ) { locations, units -> locations to units }
+        .flatMapLatest { (locations, units) -> observeAreas(locations, units) }
         // Zero timeout: a positive one schedules a delay() on viewModelScope's Main dispatcher,
         // which crashes real ViewModel unit tests on JVM (no Robolectric) even under setMain().
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), OverviewUiState.Loading)
 
-    private fun observeAreas(locations: List<Location>) =
+    private fun observeAreas(locations: List<Location>, units: Units) =
         if (locations.isEmpty()) {
             flowOf(OverviewUiState.Empty)
         } else {
@@ -99,6 +102,7 @@ class OverviewViewModel(
         viewModelScope.launch {
             _isRefreshing.value = true
             try {
+                val units = unitsPreference.units.value
                 val anyFailed = coroutineScope {
                     latestLocations
                         .map { location -> async { weatherRepository.refresh(location, units) } }
@@ -112,6 +116,10 @@ class OverviewViewModel(
                 _isRefreshing.value = false
             }
         }
+    }
+
+    fun setUnits(units: Units) {
+        unitsPreference.setUnits(units)
     }
 
     fun removeArea(id: Long) {

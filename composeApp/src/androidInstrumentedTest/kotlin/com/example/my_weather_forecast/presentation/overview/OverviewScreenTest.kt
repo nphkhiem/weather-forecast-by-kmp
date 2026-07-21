@@ -5,9 +5,11 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeDown
 import androidx.compose.ui.test.swipeLeft
+import com.example.my_weather_forecast.domain.model.Units
 import com.example.my_weather_forecast.domain.model.ForecastObservation
 import com.example.my_weather_forecast.domain.model.Location
 import com.example.my_weather_forecast.domain.usecase.AddLocationUseCase
@@ -15,6 +17,7 @@ import com.example.my_weather_forecast.domain.usecase.ObserveSavedLocationsUseCa
 import com.example.my_weather_forecast.domain.usecase.RemoveLocationUseCase
 import com.example.my_weather_forecast.presentation.theme.WeatherForecastTheme
 import com.example.my_weather_forecast.testutil.FakeSavedLocationRepository
+import com.example.my_weather_forecast.testutil.FakeUnitsPreference
 import com.example.my_weather_forecast.testutil.FakeWeatherRepository
 import com.example.my_weather_forecast.testutil.sampleForecast
 import kotlinx.coroutines.runBlocking
@@ -37,6 +40,7 @@ class OverviewScreenTest {
             removeLocationUseCase = RemoveLocationUseCase(savedLocationRepository),
             addLocationUseCase = AddLocationUseCase(savedLocationRepository),
             weatherRepository = weatherRepository,
+            unitsPreference = FakeUnitsPreference(),
         )
 
     private fun setContentWithArea(): Pair<FakeSavedLocationRepository, FakeWeatherRepository> {
@@ -101,5 +105,16 @@ class OverviewScreenTest {
 
         composeTestRule.onNodeWithText("Chicago removed").assertIsDisplayed()
         composeTestRule.onNodeWithText("Undo").assertIsDisplayed()
+    }
+
+    @Test
+    fun givenTheSettingsMenu_whenImperialSelected_thenWeatherRepositoryObservesWithImperialUnits() {
+        val (_, weatherRepository) = setContentWithArea()
+
+        composeTestRule.onNodeWithContentDescription("Settings").performClick()
+        composeTestRule.onNodeWithText("Imperial (°F)").performClick()
+        composeTestRule.waitForIdle()
+
+        assertEquals(Units.IMPERIAL, weatherRepository.lastObservedUnits)
     }
 }
