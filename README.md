@@ -1,22 +1,22 @@
-# Weather Forecast
+# Trời Ơi
 
-A Kotlin Multiplatform weather app for Android and iOS, built with Compose Multiplatform.
+My silly KMP weather app for Android and iOS, built with Compose Multiplatform.
 Search for a city, save up to 6 areas, and see current conditions, a 7-day outlook, and an
-hourly rain forecast — with offline-first caching and a metric/imperial toggle.
+hourly rain forecast, with offline-first caching and a metric/imperial toggle.
 
 ## Features
 
-- **Overview** — saved areas at a glance (current temp, high/low, rain chance), pull-to-refresh,
+- **Overview**: saved areas at a glance (current temp, high/low, rain chance), pull-to-refresh,
   swipe-to-delete with undo.
-- **Search** — debounced city search backed by OpenWeatherMap's geocoding API, capped at 6 saved
+- **Search**: debounced city search backed by OpenWeatherMap's geocoding API, capped at 6 saved
   areas.
-- **Detail** — current conditions, an hourly rain strip, and a 7-day forecast per area.
-- **Offline-first caching** — SQLDelight is the single source of truth; a 30-minute TTL plus
+- **Detail**: current conditions, an hourly rain strip, and a 7-day forecast per area.
+- **Offline-first caching**: SQLDelight is the single source of truth; a 30-minute TTL plus
   request coalescing keep the UI responsive and avoid redundant network calls. Stale cache is
   still shown (flagged) if a refresh fails.
-- **Units** — switch between metric (°C, m/s) and imperial (°F, mph); switching invalidates the
+- **Units**: switch between metric (°C, m/s) and imperial (°F, mph); switching invalidates the
   cache and refetches in the new units. Persisted across restarts.
-- **Accessible** — all user-facing strings are externalized resources; every screen is
+- **Accessible**: all user-facing strings are externalized resources; every screen is
   TalkBack/VoiceOver-navigable with content descriptions on interactive and informational
   elements.
 
@@ -42,11 +42,9 @@ hourly rain forecast — with offline-first caching and a metric/imperial toggle
 
 ## Architecture
 
-Clean Architecture with one-way dependencies: `presentation` → `domain` ← `data`. The `domain`
+Clean Architecture with one-way dependencies: `presentation` -> `domain` <- `data`. The `domain`
 layer (models, repository interfaces, use cases) has no framework imports and is the one part of
-the codebase that doesn't know Android, iOS, Compose, or SQLDelight exist. See
-[`docs/adr/0001-architecture-and-caching.md`](docs/adr/0001-architecture-and-caching.md) for the
-reasoning behind this and the caching strategy.
+the codebase that doesn't know Android, iOS, Compose, or SQLDelight exist.
 
 ## Building
 

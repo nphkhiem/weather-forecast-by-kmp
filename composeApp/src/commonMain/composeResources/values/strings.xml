@@ -44,7 +44,7 @@
     <string name="current_accessibility">%1$s, %2$d degrees, feels like %3$d degrees, %4$d percent humidity, wind %5$d %6$s, %7$d percent chance of rain</string>
     <string name="daily_temp_range">%1$d° / %2$d°</string>
     <string name="daily_summary_line">%1$d% rain  ·  Wind %2$d %3$s  ·  Humidity %4$d%</string>
-    <string name="daily_accessibility">%1$s, %2$s, high %3$d, low %4$d, %5$d percent chance of rain, wind %6$d %7$s, %8$d percent humidity</string>
+    <string name="daily_accessibility">%1$s, %2$s, %3$s, high %4$d, low %5$d, %6$d percent chance of rain, wind %7$d %8$s, %9$d percent humidity</string>
     <string name="hourly_pop_accessibility">%1$s, %2$d percent chance of rain</string>
     <string name="hourly_pop_percent">%1$d%</string>
     <string name="day_today">Today</string>

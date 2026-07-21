@@ -61,6 +61,7 @@ class OverviewViewModelTest {
             assertIs<OverviewUiState.Success>(success)
             assertEquals(1, success.areas.size)
             assertEquals(chicago.id, success.areas.first().id)
+            assertEquals(true, success.areas.first().isDaytime)
         }
     }
 

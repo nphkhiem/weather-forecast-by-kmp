@@ -8,4 +8,5 @@ data class WeatherCondition(
     val group: String,
     val description: String,
     val icon: WeatherIcon,
+    val isDaytime: Boolean,
 )

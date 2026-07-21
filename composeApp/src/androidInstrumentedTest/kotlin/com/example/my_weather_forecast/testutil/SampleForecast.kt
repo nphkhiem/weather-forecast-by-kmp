@@ -23,7 +23,7 @@ fun sampleForecast(
         humidity = 55,
         windSpeed = 3.5,
         pop = 0.2,
-        condition = WeatherCondition(owmCode = 803, group = "Clouds", description = "broken clouds", icon = WeatherIcon.CLOUDS),
+        condition = WeatherCondition(owmCode = 803, group = "Clouds", description = "broken clouds", icon = WeatherIcon.CLOUDS, isDaytime = true),
     ),
     daily = listOf(
         DailyForecast(
@@ -33,7 +33,7 @@ fun sampleForecast(
             humidity = 55,
             windSpeed = 3.5,
             pop = 0.2,
-            condition = WeatherCondition(owmCode = 803, group = "Clouds", description = "broken clouds", icon = WeatherIcon.CLOUDS),
+            condition = WeatherCondition(owmCode = 803, group = "Clouds", description = "broken clouds", icon = WeatherIcon.CLOUDS, isDaytime = true),
         ),
     ),
     hourly = listOf(

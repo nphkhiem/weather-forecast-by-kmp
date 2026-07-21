@@ -18,7 +18,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 private val chicago = Location(id = 1, name = "Chicago", country = "US", state = "IL", lat = 41.85, lon = -87.65, sortOrder = 0)
 
-private val clearSky = WeatherCondition(owmCode = 800, group = "Clear", description = "clear sky", icon = WeatherIcon.CLEAR)
+private val clearSky = WeatherCondition(owmCode = 800, group = "Clear", description = "clear sky", icon = WeatherIcon.CLEAR, isDaytime = true)
 
 private val previewForecast = Forecast(
     location = chicago,

@@ -86,6 +86,7 @@ class OverviewViewModel(
         name = location.name,
         currentTemp = current.temp,
         icon = current.condition.icon,
+        isDaytime = current.condition.isDaytime,
         todayHigh = daily.first().tempMax,
         todayLow = daily.first().tempMin,
         rainChance = daily.first().pop,

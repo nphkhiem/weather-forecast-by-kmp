@@ -1,22 +1,28 @@
 package com.example.my_weather_forecast.presentation.detail
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -24,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import com.example.my_weather_forecast.core.result.WeatherError
 import com.example.my_weather_forecast.domain.model.CurrentConditions
 import com.example.my_weather_forecast.domain.model.Units
+import com.example.my_weather_forecast.presentation.theme.palette
 import com.example.my_weather_forecast.presentation.theme.readableName
 import com.example.my_weather_forecast.presentation.theme.toDrawableResource
 import kotlin.math.roundToInt
@@ -86,18 +93,41 @@ private fun WeatherError.toMessage(): String = when (this) {
 @Composable
 private fun SuccessContent(state: DetailUiState.Success, modifier: Modifier = Modifier) {
     val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
-    LazyColumn(
-        modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
+    val dateLabels = remember(state.forecast.daily) { state.forecast.daily.map { it.date }.dailyDateLabels() }
+    val palette = state.forecast.current.condition.palette()
+
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(Brush.verticalGradient(listOf(palette.gradientStart, palette.gradientEnd)))
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        item { UpdatedBanner(state.lastUpdated, state.stale) }
-        item { CurrentConditionsHeader(state.forecast.current, state.forecast.units) }
-        item { HourlyRainStrip(state.forecast.hourly) }
-        items(state.forecast.daily, key = { it.date.toString() }) { daily ->
-            DailyRow(daily = daily, today = today, units = state.forecast.units)
+        CompositionLocalProvider(LocalContentColor provides palette.onGradient) {
+            UpdatedBanner(state.lastUpdated, state.stale)
+            CurrentConditionsHeader(state.forecast.current, state.forecast.units)
+        }
+        GlassCard {
+            HourlyRainStrip(state.forecast.hourly)
+            state.forecast.daily.forEachIndexed { index, daily ->
+                DailyRow(daily = daily, today = today, dateLabel = dateLabels[index], units = state.forecast.units)
+            }
         }
     }
+}
+
+/** A translucent surface over the condition gradient, echoing iOS's materials/vibrancy guidance. */
+@Composable
+private fun GlassCard(content: @Composable () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(20.dp))
+            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.62f))
+            .padding(vertical = 8.dp, horizontal = 4.dp),
+        content = { content() },
+    )
 }
 
 @Composable

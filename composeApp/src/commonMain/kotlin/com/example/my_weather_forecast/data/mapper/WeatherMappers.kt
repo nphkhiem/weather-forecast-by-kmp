@@ -23,6 +23,9 @@ fun WeatherConditionDto.toDomain(): WeatherCondition = WeatherCondition(
     group = main,
     description = description,
     icon = id.toWeatherIcon(),
+    // OWM's icon code always ends in "d" (day) or "n" (night), tied to that location's own
+    // sunrise/sunset rather than the device's local clock.
+    isDaytime = !icon.endsWith("n"),
 )
 
 private fun Int.toWeatherIcon(): WeatherIcon = when (this) {

@@ -7,6 +7,7 @@ data class AreaSummary(
     val name: String,
     val currentTemp: Double,
     val icon: WeatherIcon,
+    val isDaytime: Boolean,
     val todayHigh: Double,
     val todayLow: Double,
     val rainChance: Double,

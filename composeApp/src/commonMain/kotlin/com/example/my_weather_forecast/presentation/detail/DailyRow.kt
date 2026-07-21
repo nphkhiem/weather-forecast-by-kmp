@@ -40,7 +40,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-fun DailyRow(daily: DailyForecast, today: LocalDate, units: Units, modifier: Modifier = Modifier) {
+fun DailyRow(daily: DailyForecast, today: LocalDate, dateLabel: String, units: Units, modifier: Modifier = Modifier) {
     val dayLabel = daily.date.dayLabel(today)
     val conditionName = daily.condition.icon.readableName()
     val windUnitLabel = stringResource(units.windSpeedUnitLabelRes())
@@ -50,7 +50,7 @@ fun DailyRow(daily: DailyForecast, today: LocalDate, units: Units, modifier: Mod
     val windSpeed = daily.windSpeed.roundToInt()
     val accessibilityDescription = stringResource(
         Res.string.daily_accessibility,
-        dayLabel, conditionName, tempMax, tempMin, popPercent, windSpeed, windUnitLabel, daily.humidity,
+        dayLabel, dateLabel, conditionName, tempMax, tempMin, popPercent, windSpeed, windUnitLabel, daily.humidity,
     )
 
     Column(
@@ -60,11 +60,10 @@ fun DailyRow(daily: DailyForecast, today: LocalDate, units: Units, modifier: Mod
             .semantics(mergeDescendants = true) { contentDescription = accessibilityDescription },
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text(
-                text = dayLabel,
-                style = MaterialTheme.typography.titleSmall,
-                modifier = Modifier.widthIn(min = 48.dp),
-            )
+            Column(modifier = Modifier.widthIn(min = 48.dp)) {
+                Text(text = dayLabel, style = MaterialTheme.typography.titleSmall)
+                Text(text = dateLabel, style = MaterialTheme.typography.labelSmall)
+            }
             Icon(
                 painter = painterResource(daily.condition.icon.toDrawableResource()),
                 contentDescription = null,

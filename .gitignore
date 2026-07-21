@@ -39,3 +39,5 @@ iosApp/iosApp/GoogleService-Info.plist
 /CLAUDE.md
 /docs/weather-forecast-idea.md
 /docs/weather-forecast-plan.md
+/docs/ui-polish-spec.md
+/docs/adr/0001-architecture-and-caching.md
