@@ -14,6 +14,7 @@ private val previewArea = AreaSummary(
     name = "Chicago",
     currentTemp = 21.0,
     icon = WeatherIcon.RAIN,
+    isDaytime = true,
     todayHigh = 24.0,
     todayLow = 15.0,
     rainChance = 0.6,

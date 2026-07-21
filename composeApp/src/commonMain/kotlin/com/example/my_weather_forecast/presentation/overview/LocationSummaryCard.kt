@@ -10,19 +10,25 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import com.example.my_weather_forecast.presentation.theme.conditionPalette
 import com.example.my_weather_forecast.presentation.theme.readableName
 import com.example.my_weather_forecast.presentation.theme.toDrawableResource
 import kotlin.math.roundToInt
@@ -64,6 +70,7 @@ fun LocationSummaryCard(
         Res.string.area_accessibility,
         area.name, currentTemp, todayHigh, todayLow, rainChance, staleSuffix,
     )
+    val palette = area.icon.conditionPalette(area.isDaytime)
 
     SwipeToDismissBox(
         state = dismissState,
@@ -87,29 +94,39 @@ fun LocationSummaryCard(
     ) {
         Card(
             onClick = onClick,
+            colors = CardDefaults.cardColors(containerColor = Color.Transparent),
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(min = 48.dp)
+                .background(
+                    Brush.linearGradient(listOf(palette.gradientStart, palette.gradientEnd)),
+                    MaterialTheme.shapes.medium,
+                )
                 .semantics { contentDescription = accessibilityDescription },
         ) {
-            Row(
-                modifier = Modifier.padding(16.dp).fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Icon(
-                    painter = painterResource(area.icon.toDrawableResource()),
-                    contentDescription = area.icon.readableName(),
-                    tint = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.size(40.dp),
-                )
-                Column(modifier = Modifier.padding(start = 16.dp).weight(1f)) {
-                    Text(area.name, style = MaterialTheme.typography.titleMedium)
+            CompositionLocalProvider(LocalContentColor provides palette.onGradient) {
+                Row(
+                    modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(
+                        painter = painterResource(area.icon.toDrawableResource()),
+                        contentDescription = area.icon.readableName(),
+                        tint = palette.onGradient,
+                        modifier = Modifier.size(40.dp),
+                    )
+                    Column(modifier = Modifier.padding(start = 16.dp).weight(1f)) {
+                        Text(area.name, style = MaterialTheme.typography.titleMedium)
+                        Text(
+                            stringResource(Res.string.area_summary_line, todayHigh, todayLow, rainChance),
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    }
                     Text(
-                        stringResource(Res.string.area_summary_line, todayHigh, todayLow, rainChance),
-                        style = MaterialTheme.typography.bodyMedium,
+                        stringResource(Res.string.temp_degrees, currentTemp),
+                        style = MaterialTheme.typography.headlineSmall,
                     )
                 }
-                Text(stringResource(Res.string.temp_degrees, currentTemp), style = MaterialTheme.typography.headlineSmall)
             }
         }
     }

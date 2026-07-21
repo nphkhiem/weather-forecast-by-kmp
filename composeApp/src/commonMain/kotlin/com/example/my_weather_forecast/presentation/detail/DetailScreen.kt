@@ -5,14 +5,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.my_weather_forecast.presentation.theme.palette
 import myweatherforecast.composeapp.generated.resources.Res
 import myweatherforecast.composeapp.generated.resources.back
 import myweatherforecast.composeapp.generated.resources.forecast_title
@@ -33,17 +37,26 @@ fun DetailScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
+    val palette = (uiState as? DetailUiState.Success)?.forecast?.current?.condition?.palette()
+    val headerContainerColor = palette?.gradientStart ?: MaterialTheme.colorScheme.surface
+    val headerContentColor = palette?.onGradient ?: MaterialTheme.colorScheme.onSurface
 
     Scaffold(
         modifier = modifier,
+        containerColor = headerContainerColor,
         topBar = {
             TopAppBar(
-                title = { Text(uiState.screenTitle()) },
+                title = { Text(uiState.screenTitle(), color = headerContentColor) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(painter = painterResource(Res.drawable.ic_back), contentDescription = stringResource(Res.string.back))
+                        Icon(
+                            painter = painterResource(Res.drawable.ic_back),
+                            contentDescription = stringResource(Res.string.back),
+                            tint = headerContentColor,
+                        )
                     }
                 },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
             )
         },
     ) { paddingValues ->

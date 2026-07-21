@@ -7,11 +7,12 @@ import com.example.my_weather_forecast.domain.model.WeatherIcon
 import com.example.my_weather_forecast.presentation.theme.WeatherForecastTheme
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
-private fun previewArea(id: Long, name: String, stale: Boolean = false) = AreaSummary(
+private fun previewArea(id: Long, name: String, stale: Boolean = false, isDaytime: Boolean = true) = AreaSummary(
     id = id,
     name = name,
     currentTemp = 21.0,
     icon = WeatherIcon.entries[(id % WeatherIcon.entries.size).toInt()],
+    isDaytime = isDaytime,
     todayHigh = 24.0,
     todayLow = 15.0,
     rainChance = 0.3,
@@ -24,9 +25,9 @@ private val sixAreas = listOf(
     previewArea(1, "Chicago"),
     previewArea(2, "London", stale = true),
     previewArea(3, "Tokyo"),
-    previewArea(4, "Sydney"),
+    previewArea(4, "Sydney", isDaytime = false),
     previewArea(5, "Cairo"),
-    previewArea(6, "Reykjavik"),
+    previewArea(6, "Reykjavik", isDaytime = false),
 )
 
 @Composable

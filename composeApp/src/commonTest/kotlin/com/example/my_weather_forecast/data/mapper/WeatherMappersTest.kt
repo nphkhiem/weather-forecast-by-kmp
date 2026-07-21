@@ -81,6 +81,16 @@ class WeatherMappersTest {
         assertEquals(WeatherIcon.UNKNOWN, condition(999).icon)
     }
 
-    private fun condition(id: Int) =
-        WeatherConditionDto(id = id, main = "Test", description = "test", icon = "01d").toDomain()
+    @Test
+    fun givenADaytimeIconSuffix_whenMapped_thenIsDaytimeTrue() {
+        assertTrue(condition(800, icon = "01d").isDaytime)
+    }
+
+    @Test
+    fun givenANighttimeIconSuffix_whenMapped_thenIsDaytimeFalse() {
+        assertEquals(false, condition(800, icon = "01n").isDaytime)
+    }
+
+    private fun condition(id: Int, icon: String = "01d") =
+        WeatherConditionDto(id = id, main = "Test", description = "test", icon = icon).toDomain()
 }
