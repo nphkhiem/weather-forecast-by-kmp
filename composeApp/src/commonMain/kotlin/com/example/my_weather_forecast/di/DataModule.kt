@@ -10,8 +10,10 @@ import com.example.my_weather_forecast.data.local.WeatherLocalDataSource
 import com.example.my_weather_forecast.data.remote.HttpClientFactory
 import com.example.my_weather_forecast.data.remote.KtorWeatherRemoteDataSource
 import com.example.my_weather_forecast.data.remote.WeatherRemoteDataSource
+import com.example.my_weather_forecast.data.repository.CitySearchRepositoryImpl
 import com.example.my_weather_forecast.data.repository.SavedLocationRepositoryImpl
 import com.example.my_weather_forecast.data.repository.WeatherRepositoryImpl
+import com.example.my_weather_forecast.domain.repository.CitySearchRepository
 import com.example.my_weather_forecast.domain.repository.SavedLocationRepository
 import com.example.my_weather_forecast.domain.repository.WeatherRepository
 import com.example.my_weather_forecast.domain.usecase.AddLocationUseCase
@@ -30,6 +32,7 @@ val dataModule = module {
 
     single<SavedLocationRepository> { SavedLocationRepositoryImpl(get(), get()) }
     single<WeatherRepository> { WeatherRepositoryImpl(get(), get(), get(), get()) }
+    single<CitySearchRepository> { CitySearchRepositoryImpl(get()) }
 
     factory { AddLocationUseCase(get()) }
     factory { RemoveLocationUseCase(get()) }

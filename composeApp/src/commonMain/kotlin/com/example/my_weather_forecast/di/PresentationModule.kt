@@ -1,6 +1,7 @@
 package com.example.my_weather_forecast.di
 
 import com.example.my_weather_forecast.presentation.overview.OverviewViewModel
+import com.example.my_weather_forecast.presentation.search.SearchViewModel
 import org.koin.compose.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
@@ -11,4 +12,5 @@ import org.koin.dsl.module
 @Suppress("DEPRECATION")
 val presentationModule = module {
     viewModel { OverviewViewModel(get(), get(), get(), get()) }
+    viewModel { SearchViewModel(get(), get()) }
 }
