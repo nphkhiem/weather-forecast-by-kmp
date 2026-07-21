@@ -1,5 +1,6 @@
 package com.example.my_weather_forecast.di
 
+import com.example.my_weather_forecast.presentation.detail.DetailViewModel
 import com.example.my_weather_forecast.presentation.overview.OverviewViewModel
 import com.example.my_weather_forecast.presentation.search.SearchViewModel
 import org.koin.compose.viewmodel.dsl.viewModel
@@ -13,4 +14,5 @@ import org.koin.dsl.module
 val presentationModule = module {
     viewModel { OverviewViewModel(get(), get(), get(), get()) }
     viewModel { SearchViewModel(get(), get()) }
+    viewModel { (locationId: Long) -> DetailViewModel(locationId, get(), get()) }
 }
