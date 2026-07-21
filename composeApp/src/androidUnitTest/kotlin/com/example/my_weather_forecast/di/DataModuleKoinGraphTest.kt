@@ -9,11 +9,14 @@ import com.example.my_weather_forecast.data.remote.WeatherRemoteDataSource
 import com.example.my_weather_forecast.domain.model.ForecastObservation
 import com.example.my_weather_forecast.domain.model.Location
 import com.example.my_weather_forecast.domain.model.Units
+import com.example.my_weather_forecast.domain.repository.CitySearchRepository
 import com.example.my_weather_forecast.domain.repository.SavedLocationRepository
 import com.example.my_weather_forecast.domain.repository.WeatherRepository
 import com.example.my_weather_forecast.domain.usecase.AddLocationUseCase
 import com.example.my_weather_forecast.domain.usecase.ObserveSavedLocationsUseCase
 import com.example.my_weather_forecast.domain.usecase.RemoveLocationUseCase
+import com.example.my_weather_forecast.presentation.overview.OverviewViewModel
+import com.example.my_weather_forecast.presentation.search.SearchViewModel
 import com.example.my_weather_forecast.testutil.sampleForecast
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -37,7 +40,7 @@ class DataModuleKoinGraphTest {
         val inMemoryDriverModule = module {
             single<SqlDriver> { JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY).also { WeatherDatabase.Schema.create(it) } }
         }
-        return startKoin { modules(appModule, dataModule, inMemoryDriverModule) }.koin
+        return startKoin { modules(appModule, dataModule, presentationModule, inMemoryDriverModule) }.koin
     }
 
     @Test
@@ -48,9 +51,12 @@ class DataModuleKoinGraphTest {
         assertNotNull(koin.get<WeatherRemoteDataSource>())
         assertNotNull(koin.get<SavedLocationRepository>())
         assertNotNull(koin.get<WeatherRepository>())
+        assertNotNull(koin.get<CitySearchRepository>())
         assertNotNull(koin.get<AddLocationUseCase>())
         assertNotNull(koin.get<RemoveLocationUseCase>())
         assertNotNull(koin.get<ObserveSavedLocationsUseCase>())
+        assertNotNull(koin.get<OverviewViewModel>())
+        assertNotNull(koin.get<SearchViewModel>())
     }
 
     @Test
