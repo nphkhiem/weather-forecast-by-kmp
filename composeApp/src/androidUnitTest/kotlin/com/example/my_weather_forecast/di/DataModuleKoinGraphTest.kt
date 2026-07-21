@@ -15,10 +15,13 @@ import com.example.my_weather_forecast.domain.repository.WeatherRepository
 import com.example.my_weather_forecast.domain.usecase.AddLocationUseCase
 import com.example.my_weather_forecast.domain.usecase.ObserveSavedLocationsUseCase
 import com.example.my_weather_forecast.domain.usecase.RemoveLocationUseCase
+import com.example.my_weather_forecast.core.preference.UnitsPreference
 import com.example.my_weather_forecast.presentation.detail.DetailViewModel
 import com.example.my_weather_forecast.presentation.overview.OverviewViewModel
 import com.example.my_weather_forecast.presentation.search.SearchViewModel
 import com.example.my_weather_forecast.testutil.sampleForecast
+import com.russhwolf.settings.MapSettings
+import com.russhwolf.settings.Settings
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.koin.core.Koin
@@ -41,6 +44,7 @@ class DataModuleKoinGraphTest {
     private fun startTestKoin(): Koin {
         val inMemoryDriverModule = module {
             single<SqlDriver> { JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY).also { WeatherDatabase.Schema.create(it) } }
+            single<Settings> { MapSettings() }
         }
         return startKoin { modules(appModule, dataModule, presentationModule, inMemoryDriverModule) }.koin
     }
@@ -57,6 +61,7 @@ class DataModuleKoinGraphTest {
         assertNotNull(koin.get<AddLocationUseCase>())
         assertNotNull(koin.get<RemoveLocationUseCase>())
         assertNotNull(koin.get<ObserveSavedLocationsUseCase>())
+        assertNotNull(koin.get<UnitsPreference>())
         assertNotNull(koin.get<OverviewViewModel>())
         assertNotNull(koin.get<SearchViewModel>())
         assertNotNull(koin.get<DetailViewModel> { parametersOf(1L) })
