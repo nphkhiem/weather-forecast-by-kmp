@@ -8,9 +8,7 @@ import com.example.my_weather_forecast.testutil.FakeSavedLocationRepository
 import com.example.my_weather_forecast.testutil.FakeWeatherRepository
 import com.example.my_weather_forecast.testutil.runMainDispatcherTest
 import com.example.my_weather_forecast.testutil.sampleForecast
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
@@ -84,19 +82,22 @@ class DetailViewModelTest {
         }
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
-    fun whenRefreshCalled_thenWeatherRepositoryRefreshesTheObservedLocation() = testDetail { viewModel ->
+    fun givenARefresh_whenInFlight_thenIsRefreshingReflectsProgressAndWeatherRepositoryIsCalled() = testDetail { viewModel ->
         savedLocationRepository.add(chicago)
         weatherRepository.setObservation(chicago.id, ForecastObservation.Success(sampleForecast(chicago), stale = false))
 
         viewModel.uiState.test {
             awaitItem()
             awaitItem()
-            cancelAndIgnoreRemainingEvents()
+
+            viewModel.isRefreshing.test {
+                assertEquals(false, awaitItem())
+                viewModel.refresh()
+                assertEquals(true, awaitItem())
+                assertEquals(false, awaitItem())
+            }
         }
-        viewModel.refresh()
-        advanceUntilIdle()
 
         assertEquals(1, weatherRepository.refreshCallCount)
     }

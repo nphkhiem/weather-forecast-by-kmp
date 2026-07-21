@@ -9,8 +9,10 @@ import com.example.my_weather_forecast.domain.model.Units
 import com.example.my_weather_forecast.domain.repository.SavedLocationRepository
 import com.example.my_weather_forecast.domain.repository.WeatherRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -28,6 +30,9 @@ class DetailViewModel(
     private val units = Units.METRIC
 
     private var latestLocation: Location? = null
+
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val uiState: StateFlow<DetailUiState> = savedLocationRepository.observeAll()
@@ -52,7 +57,12 @@ class DetailViewModel(
     fun refresh() {
         val location = latestLocation ?: return
         viewModelScope.launch {
-            weatherRepository.refresh(location, units)
+            _isRefreshing.value = true
+            try {
+                weatherRepository.refresh(location, units)
+            } finally {
+                _isRefreshing.value = false
+            }
         }
     }
 }

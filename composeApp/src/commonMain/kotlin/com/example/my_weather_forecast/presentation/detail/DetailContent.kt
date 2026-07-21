@@ -17,6 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -31,12 +32,15 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import org.jetbrains.compose.resources.painterResource
 
+const val DETAIL_CONTENT_TEST_TAG = "detail_content"
+
 @Composable
 fun DetailContent(uiState: DetailUiState, modifier: Modifier = Modifier) {
+    val taggedModifier = modifier.testTag(DETAIL_CONTENT_TEST_TAG)
     when (uiState) {
-        is DetailUiState.Loading -> LoadingContent(modifier)
-        is DetailUiState.Error -> ErrorContent(uiState.error, modifier)
-        is DetailUiState.Success -> SuccessContent(uiState, modifier)
+        is DetailUiState.Loading -> LoadingContent(taggedModifier)
+        is DetailUiState.Error -> ErrorContent(uiState.error, taggedModifier)
+        is DetailUiState.Success -> SuccessContent(uiState, taggedModifier)
     }
 }
 

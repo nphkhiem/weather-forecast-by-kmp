@@ -15,6 +15,7 @@ import com.example.my_weather_forecast.domain.repository.WeatherRepository
 import com.example.my_weather_forecast.domain.usecase.AddLocationUseCase
 import com.example.my_weather_forecast.domain.usecase.ObserveSavedLocationsUseCase
 import com.example.my_weather_forecast.domain.usecase.RemoveLocationUseCase
+import com.example.my_weather_forecast.presentation.detail.DetailViewModel
 import com.example.my_weather_forecast.presentation.overview.OverviewViewModel
 import com.example.my_weather_forecast.presentation.search.SearchViewModel
 import com.example.my_weather_forecast.testutil.sampleForecast
@@ -23,6 +24,7 @@ import kotlinx.coroutines.test.runTest
 import org.koin.core.Koin
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
+import org.koin.core.parameter.parametersOf
 import org.koin.dsl.module
 import kotlin.test.AfterTest
 import kotlin.test.Test
@@ -57,6 +59,7 @@ class DataModuleKoinGraphTest {
         assertNotNull(koin.get<ObserveSavedLocationsUseCase>())
         assertNotNull(koin.get<OverviewViewModel>())
         assertNotNull(koin.get<SearchViewModel>())
+        assertNotNull(koin.get<DetailViewModel> { parametersOf(1L) })
     }
 
     @Test
