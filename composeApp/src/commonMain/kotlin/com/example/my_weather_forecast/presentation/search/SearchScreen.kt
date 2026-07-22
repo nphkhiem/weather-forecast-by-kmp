@@ -15,6 +15,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import myweatherforecast.composeapp.generated.resources.Res
 import myweatherforecast.composeapp.generated.resources.add_area_title
@@ -41,11 +42,19 @@ fun SearchScreen(
     val atLimitMessage = stringResource(Res.string.search_at_limit)
     val alreadySavedMessage = stringResource(Res.string.search_already_saved)
     val addFailedMessage = stringResource(Res.string.search_add_failed)
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    // The on-screen keyboard doesn't follow focus/navigation automatically on iOS the way it
+    // does on Android, so it has to be dismissed explicitly on every path out of this screen.
+    val onBackDismissingKeyboard: () -> Unit = {
+        keyboardController?.hide()
+        onBack()
+    }
 
     LaunchedEffect(viewModel) {
         viewModel.events.collect { event ->
             when (event) {
-                SearchEvent.Added -> onBack()
+                SearchEvent.Added -> onBackDismissingKeyboard()
                 SearchEvent.AtLimit -> snackbarHostState.showSnackbar(atLimitMessage)
                 SearchEvent.AlreadySaved -> snackbarHostState.showSnackbar(alreadySavedMessage)
                 SearchEvent.AddFailed -> snackbarHostState.showSnackbar(addFailedMessage)
@@ -60,7 +69,7 @@ fun SearchScreen(
             TopAppBar(
                 title = { Text(stringResource(Res.string.add_area_title)) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    IconButton(onClick = onBackDismissingKeyboard) {
                         Icon(painter = painterResource(Res.drawable.ic_back), contentDescription = stringResource(Res.string.back))
                     }
                 },

@@ -28,9 +28,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import com.example.my_weather_forecast.presentation.theme.AnimatedWeatherIcon
 import com.example.my_weather_forecast.presentation.theme.conditionPalette
 import com.example.my_weather_forecast.presentation.theme.readableName
-import com.example.my_weather_forecast.presentation.theme.toDrawableResource
 import kotlin.math.roundToInt
 import myweatherforecast.composeapp.generated.resources.Res
 import myweatherforecast.composeapp.generated.resources.area_accessibility
@@ -109,10 +109,10 @@ fun LocationSummaryCard(
                     modifier = Modifier.padding(16.dp).fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Icon(
-                        painter = painterResource(area.icon.toDrawableResource()),
+                    AnimatedWeatherIcon(
+                        icon = area.icon,
+                        isDaytime = area.isDaytime,
                         contentDescription = area.icon.readableName(),
-                        tint = palette.onGradient,
                         modifier = Modifier.size(40.dp),
                     )
                     Column(modifier = Modifier.padding(start = 16.dp).weight(1f)) {

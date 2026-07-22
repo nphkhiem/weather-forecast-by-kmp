@@ -5,7 +5,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.my_weather_forecast.core.preference.ThemeMode
+import com.example.my_weather_forecast.core.preference.ThemePreference
+import com.example.my_weather_forecast.core.preference.nextThemeMode
 
 private val SkyBlue = Color(0xFF0061A4)
 private val SkyBlueLight = Color(0xFFD1E4FF)
@@ -59,4 +68,31 @@ fun WeatherForecastTheme(
         colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme,
         content = content,
     )
+}
+
+/**
+ * Resolves [ThemeMode] against the live system setting. An explicit Light/Dark override is only
+ * good until the OS theme actually changes, at which point it's cleared back to System (see
+ * [nextThemeMode]) — the OS setting always wins over a stale in-app choice.
+ */
+@Composable
+fun rememberEffectiveDarkTheme(themePreference: ThemePreference): Boolean {
+    val systemDark = isSystemInDarkTheme()
+    val mode by themePreference.mode.collectAsStateWithLifecycle()
+    var previousSystemDark by remember { mutableStateOf(systemDark) }
+
+    LaunchedEffect(systemDark) {
+        val systemThemeChanged = systemDark != previousSystemDark
+        if (systemThemeChanged) {
+            val next = nextThemeMode(mode, systemThemeChanged = true)
+            if (next != mode) themePreference.setMode(next)
+        }
+        previousSystemDark = systemDark
+    }
+
+    return when (mode) {
+        ThemeMode.LIGHT -> false
+        ThemeMode.DARK -> true
+        ThemeMode.SYSTEM -> systemDark
+    }
 }

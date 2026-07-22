@@ -55,4 +55,19 @@ class ConditionPaletteTest {
         val endLuminance = palette.gradientEnd.luminance()
         assertTrue((endLuminance - startLuminance) < 0.2f, "gradient should be soft, not a dramatic jump")
     }
+
+    @Test
+    fun givenEveryDaytimeCondition_whenReadingAccentColor_thenEachHasADistinctColor() {
+        val accents = WeatherIcon.entries.map { it.accentColor(isDaytime = true) }
+
+        assertEquals(WeatherIcon.entries.size, accents.toSet().size)
+    }
+
+    @Test
+    fun givenClearDaytime_whenReadingAccentColor_thenItDiffersFromItsOwnNighttimeAccent() {
+        val day = WeatherIcon.CLEAR.accentColor(isDaytime = true)
+        val night = WeatherIcon.CLEAR.accentColor(isDaytime = false)
+
+        assertTrue(day != night, "day and night accents for the same condition should differ")
+    }
 }

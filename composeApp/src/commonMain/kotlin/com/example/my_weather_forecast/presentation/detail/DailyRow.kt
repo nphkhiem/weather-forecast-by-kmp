@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -18,8 +17,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.example.my_weather_forecast.domain.model.DailyForecast
 import com.example.my_weather_forecast.domain.model.Units
+import com.example.my_weather_forecast.presentation.theme.AnimatedWeatherIcon
 import com.example.my_weather_forecast.presentation.theme.readableName
-import com.example.my_weather_forecast.presentation.theme.toDrawableResource
 import kotlin.math.roundToInt
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
@@ -36,7 +35,6 @@ import myweatherforecast.composeapp.generated.resources.day_today
 import myweatherforecast.composeapp.generated.resources.day_tue
 import myweatherforecast.composeapp.generated.resources.day_wed
 import org.jetbrains.compose.resources.StringResource
-import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -64,8 +62,9 @@ fun DailyRow(daily: DailyForecast, today: LocalDate, dateLabel: String, units: U
                 Text(text = dayLabel, style = MaterialTheme.typography.titleSmall)
                 Text(text = dateLabel, style = MaterialTheme.typography.labelSmall)
             }
-            Icon(
-                painter = painterResource(daily.condition.icon.toDrawableResource()),
+            AnimatedWeatherIcon(
+                icon = daily.condition.icon,
+                isDaytime = daily.condition.isDaytime,
                 contentDescription = null,
                 modifier = Modifier.size(28.dp),
             )

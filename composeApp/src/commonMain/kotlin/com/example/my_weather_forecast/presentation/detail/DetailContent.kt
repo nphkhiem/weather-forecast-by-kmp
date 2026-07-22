@@ -6,13 +6,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -21,7 +20,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
@@ -30,9 +28,9 @@ import androidx.compose.ui.unit.dp
 import com.example.my_weather_forecast.core.result.WeatherError
 import com.example.my_weather_forecast.domain.model.CurrentConditions
 import com.example.my_weather_forecast.domain.model.Units
+import com.example.my_weather_forecast.presentation.theme.AnimatedWeatherIcon
 import com.example.my_weather_forecast.presentation.theme.palette
 import com.example.my_weather_forecast.presentation.theme.readableName
-import com.example.my_weather_forecast.presentation.theme.toDrawableResource
 import kotlin.math.roundToInt
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
@@ -50,7 +48,6 @@ import myweatherforecast.composeapp.generated.resources.feels_like
 import myweatherforecast.composeapp.generated.resources.stale_suffix
 import myweatherforecast.composeapp.generated.resources.temp_degrees
 import myweatherforecast.composeapp.generated.resources.updated_at
-import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 const val DETAIL_CONTENT_TEST_TAG = "detail_content"
@@ -100,6 +97,7 @@ private fun SuccessContent(state: DetailUiState.Success, modifier: Modifier = Mo
         modifier = modifier
             .fillMaxSize()
             .background(Brush.verticalGradient(listOf(palette.gradientStart, palette.gradientEnd)))
+            .navigationBarsPadding()
             .verticalScroll(rememberScrollState())
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -107,27 +105,14 @@ private fun SuccessContent(state: DetailUiState.Success, modifier: Modifier = Mo
         CompositionLocalProvider(LocalContentColor provides palette.onGradient) {
             UpdatedBanner(state.lastUpdated, state.stale)
             CurrentConditionsHeader(state.forecast.current, state.forecast.units)
-        }
-        GlassCard {
-            HourlyRainStrip(state.forecast.hourly)
-            state.forecast.daily.forEachIndexed { index, daily ->
-                DailyRow(daily = daily, today = today, dateLabel = dateLabels[index], units = state.forecast.units)
+            Column {
+                HourlyRainStrip(state.forecast.hourly.todayOnly(today))
+                state.forecast.daily.forEachIndexed { index, daily ->
+                    DailyRow(daily = daily, today = today, dateLabel = dateLabels[index], units = state.forecast.units)
+                }
             }
         }
     }
-}
-
-/** A translucent surface over the condition gradient, echoing iOS's materials/vibrancy guidance. */
-@Composable
-private fun GlassCard(content: @Composable () -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
-            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.62f))
-            .padding(vertical = 8.dp, horizontal = 4.dp),
-        content = { content() },
-    )
 }
 
 @Composable
@@ -155,8 +140,9 @@ private fun CurrentConditionsHeader(current: CurrentConditions, units: Units, mo
             .fillMaxWidth()
             .semantics(mergeDescendants = true) { contentDescription = accessibilityDescription },
     ) {
-        Icon(
-            painter = painterResource(current.condition.icon.toDrawableResource()),
+        AnimatedWeatherIcon(
+            icon = current.condition.icon,
+            isDaytime = current.condition.isDaytime,
             contentDescription = null,
             modifier = Modifier.size(56.dp),
         )

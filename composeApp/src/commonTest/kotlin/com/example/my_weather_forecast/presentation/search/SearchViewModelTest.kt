@@ -88,4 +88,23 @@ class SearchViewModelTest {
             assertEquals(SearchUiState.Empty, awaitItem())
         }
     }
+
+    @Test
+    fun givenResultsWithDuplicateCoordinates_whenSearched_thenOnlyOneIsKept() = runMainDispatcherTest {
+        val budapestArea = Location(
+            id = 0, name = "Sárospatak", country = "HU", state = null, lat = 47.8221556, lon = 17.6157716, sortOrder = 0,
+        )
+        val duplicate = budapestArea.copy(name = "Sarospatak")
+        citySearchRepository.result = AppResult.Success(listOf(budapestArea, duplicate))
+        val viewModel = viewModel()
+
+        viewModel.uiState.test {
+            assertEquals(SearchUiState.Idle, awaitItem())
+            viewModel.onQueryChange("Sâp")
+            assertEquals(SearchUiState.Loading, awaitItem())
+            val results = awaitItem()
+            assertIs<SearchUiState.Results>(results)
+            assertEquals(1, results.locations.size)
+        }
+    }
 }

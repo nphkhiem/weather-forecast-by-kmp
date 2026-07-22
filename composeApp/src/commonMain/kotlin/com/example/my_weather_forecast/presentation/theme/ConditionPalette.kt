@@ -32,6 +32,41 @@ private val ClearNight = ConditionPalette(Color(0xFF2E3348), Color(0xFF48445F), 
 private val StormyNight = ConditionPalette(Color(0xFF242C38), Color(0xFF3A4652), InkDark)
 private val QuietNight = ConditionPalette(Color(0xFF2A2E36), Color(0xFF40454E), InkDark)
 
+// Per-condition icon accent colors, matching the approved "Muted Pastel" draft direction.
+private val ClearAccentDay = Color(0xFFE08A3E)
+private val CloudsAccentDay = Color(0xFF6C7A85)
+private val RainAccentDay = Color(0xFF4C8A8F)
+private val DrizzleAccentDay = Color(0xFF5FA0A4)
+private val ThunderstormAccentDay = Color(0xFF6E5E96)
+private val SnowAccentDay = Color(0xFF6FA3C9)
+private val AtmosphereAccentDay = Color(0xFF8C8C7E)
+private val UnknownAccentDay = Color(0xFF9A9A94)
+
+private val ClearAccentNight = Color(0xFFEDEBF3)
+private val CloudsAccentNight = Color(0xFFB7BCC7)
+private val StormyAccentNight = Color(0xFF9FB9BD)
+private val QuietAccentNight = Color(0xFFA9ADB6)
+
+fun WeatherIcon.accentColor(isDaytime: Boolean): Color = if (isDaytime) {
+    when (this) {
+        WeatherIcon.CLEAR -> ClearAccentDay
+        WeatherIcon.CLOUDS -> CloudsAccentDay
+        WeatherIcon.RAIN -> RainAccentDay
+        WeatherIcon.DRIZZLE -> DrizzleAccentDay
+        WeatherIcon.THUNDERSTORM -> ThunderstormAccentDay
+        WeatherIcon.SNOW -> SnowAccentDay
+        WeatherIcon.ATMOSPHERE -> AtmosphereAccentDay
+        WeatherIcon.UNKNOWN -> UnknownAccentDay
+    }
+} else {
+    when (this) {
+        WeatherIcon.CLEAR -> ClearAccentNight
+        WeatherIcon.CLOUDS -> CloudsAccentNight
+        WeatherIcon.RAIN, WeatherIcon.DRIZZLE, WeatherIcon.THUNDERSTORM -> StormyAccentNight
+        WeatherIcon.SNOW, WeatherIcon.ATMOSPHERE, WeatherIcon.UNKNOWN -> QuietAccentNight
+    }
+}
+
 fun WeatherCondition.palette(): ConditionPalette = icon.conditionPalette(isDaytime)
 
 fun WeatherIcon.conditionPalette(isDaytime: Boolean): ConditionPalette = if (isDaytime) {
