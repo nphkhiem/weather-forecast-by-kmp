@@ -23,7 +23,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -108,7 +107,7 @@ private fun SuccessContent(state: DetailUiState.Success, modifier: Modifier = Mo
             UpdatedBanner(state.lastUpdated, state.stale)
             CurrentConditionsHeader(state.forecast.current, state.forecast.units)
         }
-        GlassCard(gradientStart = palette.gradientStart, gradientEnd = palette.gradientEnd) {
+        GlassCard(gradient = Brush.verticalGradient(listOf(palette.gradientStart, palette.gradientEnd))) {
             HourlyRainStrip(state.forecast.hourly.todayOnly(today))
             state.forecast.daily.forEachIndexed { index, daily ->
                 DailyRow(daily = daily, today = today, dateLabel = dateLabels[index], units = state.forecast.units)
@@ -125,7 +124,7 @@ private fun SuccessContent(state: DetailUiState.Success, modifier: Modifier = Mo
  * that it no-ops and the card degrades gracefully to the scrim-only look.
  */
 @Composable
-private fun GlassCard(gradientStart: Color, gradientEnd: Color, content: @Composable () -> Unit) {
+private fun GlassCard(gradient: Brush, content: @Composable () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -135,7 +134,7 @@ private fun GlassCard(gradientStart: Color, gradientEnd: Color, content: @Compos
             modifier = Modifier
                 .matchParentSize()
                 .blur(GlassBlurRadius)
-                .background(Brush.verticalGradient(listOf(gradientStart, gradientEnd))),
+                .background(gradient),
         )
         Box(modifier = Modifier.matchParentSize().background(MaterialTheme.colorScheme.surface.copy(alpha = 0.45f)))
         Column(
