@@ -10,6 +10,7 @@ import androidx.navigation.navArgument
 import com.example.my_weather_forecast.presentation.detail.DetailScreen
 import com.example.my_weather_forecast.presentation.overview.OverviewScreen
 import com.example.my_weather_forecast.presentation.search.SearchScreen
+import com.example.my_weather_forecast.presentation.settings.SettingsScreen
 
 @Composable
 fun WeatherNavHost(navController: NavHostController = rememberNavController()) {
@@ -17,11 +18,15 @@ fun WeatherNavHost(navController: NavHostController = rememberNavController()) {
         composable(Routes.OVERVIEW) {
             OverviewScreen(
                 onOpenSearch = { navController.navigate(Routes.SEARCH) },
+                onOpenSettings = { navController.navigate(Routes.SETTINGS) },
                 onOpenDetail = { locationId -> navController.navigate(Routes.detail(locationId)) },
             )
         }
         composable(Routes.SEARCH) {
             SearchScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Routes.SETTINGS) {
+            SettingsScreen(onBack = { navController.popBackStack() })
         }
         composable(
             route = Routes.DETAIL,

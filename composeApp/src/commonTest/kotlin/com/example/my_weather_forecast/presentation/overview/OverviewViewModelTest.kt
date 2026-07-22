@@ -137,13 +137,6 @@ class OverviewViewModelTest {
     }
 
     @Test
-    fun whenSetUnitsCalled_thenUnitsPreferenceIsUpdated() = testOverview { viewModel ->
-        viewModel.setUnits(Units.IMPERIAL)
-
-        assertEquals(Units.IMPERIAL, unitsPreference.units.value)
-    }
-
-    @Test
     fun givenCardTapped_whenOnAreaClick_thenOpenDetailEmittedOnce() = testOverview { viewModel ->
         viewModel.events.test {
             viewModel.onAreaClick(chicago.id)

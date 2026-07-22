@@ -4,10 +4,16 @@
     <string name="app_title">Weather</string>
 
     <string name="add_area">Add area</string>
-    <string name="more_options">More options</string>
+    <string name="settings">Open settings</string>
+    <string name="settings_title">Settings</string>
+    <string name="units_section_label">Units</string>
     <string name="units_metric">Metric (°C)</string>
     <string name="units_imperial">Imperial (°F)</string>
-    <string name="units_selected_checkmark">✓</string>
+    <string name="selected_checkmark">✓</string>
+    <string name="theme_section_label">Theme</string>
+    <string name="theme_system">System</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
     <string name="undo">Undo</string>
     <string name="overview_empty">No saved areas yet. Tap + to add one.</string>
     <string name="area_removed">%1$s removed</string>

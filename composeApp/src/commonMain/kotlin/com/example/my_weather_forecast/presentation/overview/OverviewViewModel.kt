@@ -37,8 +37,6 @@ class OverviewViewModel(
     private val unitsPreference: UnitsPreference,
 ) : ViewModel() {
 
-    val units: StateFlow<Units> = unitsPreference.units
-
     private val _events = MutableSharedFlow<OverviewEvent>()
     val events: SharedFlow<OverviewEvent> = _events.asSharedFlow()
 
@@ -117,10 +115,6 @@ class OverviewViewModel(
                 _isRefreshing.value = false
             }
         }
-    }
-
-    fun setUnits(units: Units) {
-        unitsPreference.setUnits(units)
     }
 
     fun removeArea(id: Long) {
