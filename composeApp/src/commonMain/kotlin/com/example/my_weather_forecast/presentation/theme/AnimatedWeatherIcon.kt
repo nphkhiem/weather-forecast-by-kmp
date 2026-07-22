@@ -19,13 +19,13 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.example.my_weather_forecast.domain.model.WeatherIcon
 import kotlin.math.PI
 import kotlin.math.sin
 import myweatherforecast.composeapp.generated.resources.Res
+import myweatherforecast.composeapp.generated.resources.ic_weather_precipitation_cloud
 import myweatherforecast.composeapp.generated.resources.ic_weather_thunderstorm_bolt
 import myweatherforecast.composeapp.generated.resources.ic_weather_thunderstorm_cloud
 import org.jetbrains.compose.resources.painterResource
@@ -82,7 +82,6 @@ fun AnimatedWeatherIcon(
         }
 
         icon == WeatherIcon.RAIN -> FallingPrecipitation(
-            painter = painter,
             tint = tint,
             contentDescription = contentDescription,
             modifier = modifier,
@@ -94,7 +93,6 @@ fun AnimatedWeatherIcon(
         )
 
         icon == WeatherIcon.DRIZZLE -> FallingPrecipitation(
-            painter = painter,
             tint = tint,
             contentDescription = contentDescription,
             modifier = modifier,
@@ -106,7 +104,6 @@ fun AnimatedWeatherIcon(
         )
 
         icon == WeatherIcon.SNOW -> FallingPrecipitation(
-            painter = painter,
             tint = tint,
             contentDescription = contentDescription,
             modifier = modifier,
@@ -157,12 +154,12 @@ fun AnimatedWeatherIcon(
 }
 
 /**
- * Cloud icon stays static; small falling accents (raindrops/drizzle/snow) loop underneath at
- * staggered phases so they read as continuous fall rather than a single blinking dot.
+ * Cloud body only — no static drop/flake marks baked in, since [FallingPrecipitation] draws the
+ * only accents here itself, animated. A static mark alongside the animated ones would just look
+ * like visual clutter/duplication.
  */
 @Composable
 private fun FallingPrecipitation(
-    painter: Painter,
     tint: Color,
     contentDescription: String?,
     modifier: Modifier,
@@ -180,7 +177,12 @@ private fun FallingPrecipitation(
         label = "precipitationFall",
     )
     Box(modifier = modifier) {
-        Icon(painter, contentDescription, tint = tint, modifier = Modifier.matchParentSize())
+        Icon(
+            painter = painterResource(Res.drawable.ic_weather_precipitation_cloud),
+            contentDescription = contentDescription,
+            tint = tint,
+            modifier = Modifier.matchParentSize(),
+        )
         Canvas(modifier = Modifier.matchParentSize()) {
             val startY = size.height * 0.5f
             val endY = size.height * 0.95f
