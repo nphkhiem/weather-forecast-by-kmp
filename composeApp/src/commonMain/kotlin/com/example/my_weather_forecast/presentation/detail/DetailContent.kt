@@ -12,7 +12,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -21,8 +20,10 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -30,9 +31,9 @@ import androidx.compose.ui.unit.dp
 import com.example.my_weather_forecast.core.result.WeatherError
 import com.example.my_weather_forecast.domain.model.CurrentConditions
 import com.example.my_weather_forecast.domain.model.Units
+import com.example.my_weather_forecast.presentation.theme.AnimatedWeatherIcon
 import com.example.my_weather_forecast.presentation.theme.palette
 import com.example.my_weather_forecast.presentation.theme.readableName
-import com.example.my_weather_forecast.presentation.theme.toDrawableResource
 import kotlin.math.roundToInt
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
@@ -50,7 +51,6 @@ import myweatherforecast.composeapp.generated.resources.feels_like
 import myweatherforecast.composeapp.generated.resources.stale_suffix
 import myweatherforecast.composeapp.generated.resources.temp_degrees
 import myweatherforecast.composeapp.generated.resources.updated_at
-import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 const val DETAIL_CONTENT_TEST_TAG = "detail_content"
@@ -108,8 +108,8 @@ private fun SuccessContent(state: DetailUiState.Success, modifier: Modifier = Mo
             UpdatedBanner(state.lastUpdated, state.stale)
             CurrentConditionsHeader(state.forecast.current, state.forecast.units)
         }
-        GlassCard {
-            HourlyRainStrip(state.forecast.hourly)
+        GlassCard(gradientStart = palette.gradientStart, gradientEnd = palette.gradientEnd) {
+            HourlyRainStrip(state.forecast.hourly.todayOnly(today))
             state.forecast.daily.forEachIndexed { index, daily ->
                 DailyRow(daily = daily, today = today, dateLabel = dateLabels[index], units = state.forecast.units)
             }
@@ -117,18 +117,35 @@ private fun SuccessContent(state: DetailUiState.Success, modifier: Modifier = Mo
     }
 }
 
-/** A translucent surface over the condition gradient, echoing iOS's materials/vibrancy guidance. */
+/**
+ * A frosted-glass surface over the condition gradient, echoing iOS's materials/vibrancy guidance.
+ * Compose has no true backdrop-filter, so the same gradient is redrawn behind the card and
+ * blurred there, then covered with a translucent scrim before content is drawn on top
+ * unblurred. `Modifier.blur` only renders on Android API 31+ (this project's minSdk is 24); below
+ * that it no-ops and the card degrades gracefully to the scrim-only look.
+ */
 @Composable
-private fun GlassCard(content: @Composable () -> Unit) {
-    Column(
+private fun GlassCard(gradientStart: Color, gradientEnd: Color, content: @Composable () -> Unit) {
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
-            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.62f))
-            .padding(vertical = 8.dp, horizontal = 4.dp),
-        content = { content() },
-    )
+            .clip(RoundedCornerShape(20.dp)),
+    ) {
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .blur(GlassBlurRadius)
+                .background(Brush.verticalGradient(listOf(gradientStart, gradientEnd))),
+        )
+        Box(modifier = Modifier.matchParentSize().background(MaterialTheme.colorScheme.surface.copy(alpha = 0.45f)))
+        Column(
+            modifier = Modifier.padding(vertical = 8.dp, horizontal = 4.dp),
+            content = { content() },
+        )
+    }
 }
+
+private val GlassBlurRadius = 16.dp
 
 @Composable
 private fun UpdatedBanner(lastUpdated: Instant, stale: Boolean, modifier: Modifier = Modifier) {
@@ -155,8 +172,9 @@ private fun CurrentConditionsHeader(current: CurrentConditions, units: Units, mo
             .fillMaxWidth()
             .semantics(mergeDescendants = true) { contentDescription = accessibilityDescription },
     ) {
-        Icon(
-            painter = painterResource(current.condition.icon.toDrawableResource()),
+        AnimatedWeatherIcon(
+            icon = current.condition.icon,
+            isDaytime = current.condition.isDaytime,
             contentDescription = null,
             modifier = Modifier.size(56.dp),
         )
