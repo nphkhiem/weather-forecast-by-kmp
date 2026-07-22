@@ -1,5 +1,6 @@
 package com.example.my_weather_forecast.presentation.detail
 
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -44,6 +45,9 @@ fun DetailScreen(
     Scaffold(
         modifier = modifier,
         containerColor = headerContainerColor,
+        // Detail draws its own edge-to-edge gradient; reserving a separate bottom/side inset
+        // here would leave a gap showing this solid containerColor instead of that gradient.
+        contentWindowInsets = WindowInsets(0),
         topBar = {
             TopAppBar(
                 title = { Text(uiState.screenTitle(), color = headerContentColor) },
