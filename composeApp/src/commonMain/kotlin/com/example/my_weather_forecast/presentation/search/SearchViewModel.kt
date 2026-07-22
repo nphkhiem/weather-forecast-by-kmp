@@ -48,7 +48,11 @@ class SearchViewModel(
             flow {
                 emit(SearchUiState.Loading)
                 when (val result = citySearchRepository.searchCity(query)) {
-                    is AppResult.Success -> emit(SearchUiState.Results(result.data))
+                    // The geocoding API can return multiple entries at the exact same
+                    // coordinates (e.g. name-spelling variants of the same place); the results
+                    // list is keyed by coordinates in the UI, so duplicates must be collapsed
+                    // here rather than crashing on a repeated LazyColumn key.
+                    is AppResult.Success -> emit(SearchUiState.Results(result.data.distinctBy { it.lat to it.lon }))
                     is AppResult.Failure -> emit(
                         if (result.error == WeatherError.NotFound) SearchUiState.Empty else SearchUiState.Error(result.error),
                     )
