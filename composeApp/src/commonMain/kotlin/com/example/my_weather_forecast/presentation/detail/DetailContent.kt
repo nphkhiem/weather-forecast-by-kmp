@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LocalContentColor
@@ -20,8 +19,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
@@ -106,45 +103,15 @@ private fun SuccessContent(state: DetailUiState.Success, modifier: Modifier = Mo
         CompositionLocalProvider(LocalContentColor provides palette.onGradient) {
             UpdatedBanner(state.lastUpdated, state.stale)
             CurrentConditionsHeader(state.forecast.current, state.forecast.units)
-        }
-        GlassCard(gradient = Brush.verticalGradient(listOf(palette.gradientStart, palette.gradientEnd))) {
-            HourlyRainStrip(state.forecast.hourly.todayOnly(today))
-            state.forecast.daily.forEachIndexed { index, daily ->
-                DailyRow(daily = daily, today = today, dateLabel = dateLabels[index], units = state.forecast.units)
+            Column {
+                HourlyRainStrip(state.forecast.hourly.todayOnly(today))
+                state.forecast.daily.forEachIndexed { index, daily ->
+                    DailyRow(daily = daily, today = today, dateLabel = dateLabels[index], units = state.forecast.units)
+                }
             }
         }
     }
 }
-
-/**
- * A frosted-glass surface over the condition gradient, echoing iOS's materials/vibrancy guidance.
- * Compose has no true backdrop-filter, so the same gradient is redrawn behind the card and
- * blurred there, then covered with a translucent scrim before content is drawn on top
- * unblurred. `Modifier.blur` only renders on Android API 31+ (this project's minSdk is 24); below
- * that it no-ops and the card degrades gracefully to the scrim-only look.
- */
-@Composable
-private fun GlassCard(gradient: Brush, content: @Composable () -> Unit) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp)),
-    ) {
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .blur(GlassBlurRadius)
-                .background(gradient),
-        )
-        Box(modifier = Modifier.matchParentSize().background(MaterialTheme.colorScheme.surface.copy(alpha = 0.45f)))
-        Column(
-            modifier = Modifier.padding(vertical = 8.dp, horizontal = 4.dp),
-            content = { content() },
-        )
-    }
-}
-
-private val GlassBlurRadius = 16.dp
 
 @Composable
 private fun UpdatedBanner(lastUpdated: Instant, stale: Boolean, modifier: Modifier = Modifier) {
